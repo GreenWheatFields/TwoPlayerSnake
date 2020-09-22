@@ -15,12 +15,10 @@ class Board():
 
 class Food:
     def __init__(self):
-        self.food = [random.randrange(width), random.randrange(height)]
-        self.drawn = False
+        self.food = [round(random.randrange(width), -1), round(random.randrange(height), -1)]
 
     def draw(self):
         pygame.draw.rect(board.dis, (24,252,0), [self.food[0], self.food[1], 10, 10])
-        self.drawn = True
 
 
 class Snake():
@@ -73,8 +71,9 @@ class Game:
             yPosistion += y_change
 
             board.dis.fill((0, 0, 0))
+            print(xPosistion, yPosistion, food.food[0], food.food[1])
 
-            if not food.drawn
+            food.draw()
             snake.draw(xPosistion, yPosistion)
             pygame.display.update()
             clock.tick(30)
