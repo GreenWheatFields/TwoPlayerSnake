@@ -13,28 +13,41 @@ class Board():
     def updateBoard(self):
         pygame.display.update()
 
+
 class Food:
     def __init__(self):
         self.food = [round(random.randrange(width), -1), round(random.randrange(height), -1)]
+        if self.food[1] == 300:
+            self.food[1] = 160
+        #todo, y value of 300 doesnt show
 
     def draw(self):
-        pygame.draw.rect(board.dis, (24,252,0), [self.food[0], self.food[1], 10, 10])
+        pygame.draw.rect(board.dis, (24, 252, 0), [self.food[0], self.food[1], 10, 10])
 
 
 class Snake():
     def __init__(self, x: int, y: int, board: Board):
         self.board = board
         pygame.draw.rect(board.dis, white, [x, y, 10, 10])
+        self.snake = []
 
     def draw(self, newX, newY):
         # draw a snake
-        pygame.draw.rect(self.board.dis, white, [newX, newY, 10, 10])
+        if len(self.snake) == 0:
+            pygame.draw.rect(self.board.dis, white, [newX, newY, 10, 10])
+        # else:
+        #     for i in self.snake:
+        #         print(i)
+        #         pygame.draw.rect(self.board.dis, white, [i[0], i[1], 10, 10])
+
+    def eat(self, x, y):
+        self.snake.append([x, y])
 
 
 class Game:
     @staticmethod
     def start():
-        pygame.init()  #init outside class?
+        pygame.init()  # init outside class?
         global board
         board = Board()
         game_over = False
@@ -65,18 +78,21 @@ class Game:
             if xPosistion >= 400 or xPosistion <= 0 or yPosistion >= 300 or yPosistion <= 0:
                 game_over = True
             elif xPosistion == food.food[0] and yPosistion == food.food[1]:
-                game_over = True
+                # game_over = True
+                # snake.eat(food.food[0],food.food[1])
+                food = Food()
 
             xPosistion += x_change
             yPosistion += y_change
+            print(food.food)
 
             board.dis.fill((0, 0, 0))
-            print(xPosistion, yPosistion, food.food[0], food.food[1])
+            # print(xPosistion, yPosistion, food.food[0], food.food[1])
 
             food.draw()
             snake.draw(xPosistion, yPosistion)
             pygame.display.update()
-            clock.tick(30)
+            clock.tick(15)
         pygame.quit()
         quit()
 
