@@ -29,16 +29,15 @@ class Snake():
     def __init__(self, x: int, y: int, board: Board):
         self.board = board
         pygame.draw.rect(board.dis, white, [x, y, 10, 10])
-        self.snake = []
+        self.snake = [[x,y]]
 
     def draw(self, newX, newY):
-        # draw a snake
-        if len(self.snake) == 0:
-            pygame.draw.rect(self.board.dis, white, [newX, newY, 10, 10])
-        # else:
-        #     for i in self.snake:
-        #         print(i)
-        #         pygame.draw.rect(self.board.dis, white, [i[0], i[1], 10, 10])
+        # # draw a snake
+        self.snake.append([newX,newY])
+        self.snake.pop(0)
+        for i in self.snake:
+            pygame.draw.rect(self.board.dis, white, [i[0], i[1], 10, 10])
+
 
     def eat(self, x, y):
         self.snake.append([x, y])
@@ -79,12 +78,11 @@ class Game:
                 game_over = True
             elif xPosistion == food.food[0] and yPosistion == food.food[1]:
                 # game_over = True
-                # snake.eat(food.food[0],food.food[1])
+                snake.eat(food.food[0],food.food[1])
                 food = Food()
 
             xPosistion += x_change
             yPosistion += y_change
-            print(food.food)
 
             board.dis.fill((0, 0, 0))
             # print(xPosistion, yPosistion, food.food[0], food.food[1])
