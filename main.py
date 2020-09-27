@@ -1,3 +1,5 @@
+from collections import Counter
+
 import pygame
 import random
 
@@ -16,7 +18,9 @@ class Board():
 
 class Food:
     def __init__(self):
-        self.food = [round(random.randrange(width), -1), round(random.randrange(height), -1)]
+        self.food = [round(random.randrange(width - 10), -1), round(random.randrange(height), -1)]
+        # food doesnt show at [400,200]
+        print(self.food)
         if self.food[1] == 300:
             self.food[1] = 160
         #todo, y value of 300 doesnt show
@@ -41,6 +45,14 @@ class Snake():
 
     def eat(self, x, y):
         self.snake.append([x, y])
+
+    def isCollision(self,x,y):
+        if [x,y] in self.snake[0:len(self.snake) -1]:
+            # doesnt work when size is 2
+            print("herehere")
+            print(self.snake)
+            print([x,y])
+            return True
 
 
 class Game:
@@ -74,23 +86,27 @@ class Game:
                     elif event.key == pygame.K_DOWN:
                         x_change = 0
                         y_change = 10
-            if xPosistion >= 400 or xPosistion <= 0 or yPosistion >= 300 or yPosistion <= 0:
+            if xPosistion > 400 or xPosistion < 0 or yPosistion > 300 or yPosistion < 0:
+                print(xPosistion, yPosistion)
                 game_over = True
             elif xPosistion == food.food[0] and yPosistion == food.food[1]:
                 # game_over = True
                 snake.eat(food.food[0],food.food[1])
                 food = Food()
+            elif snake.isCollision(xPosistion, yPosistion):
+                Game.game_over()
 
             xPosistion += x_change
             yPosistion += y_change
 
             board.dis.fill((0, 0, 0))
-            # print(xPosistion, yPosistion, food.food[0], food.food[1])
-
             food.draw()
             snake.draw(xPosistion, yPosistion)
             pygame.display.update()
             clock.tick(15)
+        game_over()
+    @staticmethod
+    def game_over():
         pygame.quit()
         quit()
 
