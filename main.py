@@ -12,18 +12,22 @@ class Board():
     def __init__(self):
         self.dis = pygame.display.set_mode((width, height))
 
-    def updateBoard(self):
-        pygame.display.update()
-
-
+made
 class Food:
-    def __init__(self):
+    def __init__(self, snake, squares: list):
+        valid_squares = squares
+        for j in snake:
+            for i, index in enumerate(valid_squares):
+                if j == i:
+                    #todo, doesnt work
+                    print("here")
+                    valid_squares.pop(index)
+                    continue
         self.food = [round(random.randrange(width - 10), -1), round(random.randrange(height), -1)]
-        # food doesnt show at [400,200]
-        print(self.food)
+        # todo, dont generate food inside a snake. Random numbers would get very inefficent as snake grew bigger
+        # self.food = [0, 0]
         if self.food[1] == 300:
             self.food[1] = 160
-        # todo, y value of 300 doesnt show
 
     def draw(self):
         pygame.draw.rect(board.dis, (24, 252, 0), [self.food[0], self.food[1], 10, 10])
@@ -46,7 +50,8 @@ class Snake():
         self.snake.append([x, y])
 
     def isCollision(self, x, y):
-        if [x, y] in self.snake[0:len(self.snake) - 1]:
+        snake_head = self.snake[len(self.snake) - 1]
+        if [snake_head[0], snake_head[1]] in self.snake[0:len(self.snake) - 1]:
             return True
         elif len(self.snake) == 2:
             if y == 0:
@@ -58,8 +63,15 @@ class Snake():
 
 
 class Game:
-    @staticmethod
-    def start():
+    def __init__(self):
+        self.score = 0
+        self.squares = []
+        for i in range(0,310, 10):
+            print(i)
+            for j in range(0,400, 10):
+                self.squares.append([i,j])
+
+    def start(self):
         pygame.init()  # init outside class?
         global board
         board = Board()
@@ -70,7 +82,7 @@ class Game:
         yPosistion = 150
         clock = pygame.time.Clock()
         snake = Snake(xPosistion, yPosistion, board)
-        food = Food()
+        food = Food(snake.snake, self.squares)
         while not game_over:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -89,14 +101,13 @@ class Game:
                         x_change = 0
                         y_change = 10
             if xPosistion > 400 or xPosistion < 0 or yPosistion > 300 or yPosistion < 0:
-                Game.game_over()
+                self.game_over()
             elif xPosistion == food.food[0] and yPosistion == food.food[1]:
                 snake.eat(food.food[0], food.food[1])
-                food = Food()
+                self.score += 1
+                food = Food(snake.snake, self.squares)
             elif snake.isCollision(x_change, y_change):
-                Game.game_over()
-
-
+                self.game_over()
 
             xPosistion += x_change
             yPosistion += y_change
@@ -105,16 +116,16 @@ class Game:
             food.draw()
             snake.draw(xPosistion, yPosistion)
             pygame.display.update()
-            clock.tick(5)
+            clock.tick(15)
         pygame.quit()
         quit()
 
-    @staticmethod
-    def game_over():
+    def game_over(self):
         # just so display doesnt update after game over
         pygame.quit()
         quit()
 
 
 if __name__ == '__main__':
-    Game.start()
+    g = Game()
+    g.start()
