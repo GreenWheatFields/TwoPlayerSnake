@@ -11,8 +11,8 @@ global board
 class Board():
     def __init__(self):
         self.dis = pygame.display.set_mode((width, height))
+        pygame.display.set_caption("2PSnake")
 
-made
 class Food:
     def __init__(self, snake, squares: list):
         valid_squares = squares
@@ -83,6 +83,8 @@ class Game:
         clock = pygame.time.Clock()
         snake = Snake(xPosistion, yPosistion, board)
         food = Food(snake.snake, self.squares)
+        s = pygame.font.SysFont("comicsansms",25)
+
         while not game_over:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -100,7 +102,8 @@ class Game:
                     elif event.key == pygame.K_DOWN:
                         x_change = 0
                         y_change = 10
-            if xPosistion > 400 or xPosistion < 0 or yPosistion > 300 or yPosistion < 0:
+            if xPosistion > 400 or xPosistion <= 0 or yPosistion > 300 or yPosistion <= 0:
+                #todo, right side border too big
                 self.game_over()
             elif xPosistion == food.food[0] and yPosistion == food.food[1]:
                 snake.eat(food.food[0], food.food[1])
@@ -115,6 +118,10 @@ class Game:
             board.dis.fill((0, 0, 0))
             food.draw()
             snake.draw(xPosistion, yPosistion)
+
+            v = s.render(str(self.score), True, white)
+            board.dis.blit(v, [0, 0])
+
             pygame.display.update()
             clock.tick(15)
         pygame.quit()
