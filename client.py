@@ -8,10 +8,8 @@ s.connect(('localhost', 8089))
 usename = str(uuid.uuid4())
 s.send(usename.encode())
 while True:
-    incoming = s.recv(128)
-    print(incoming.decode())
-    print(json.loads(incoming))
-    break
+    s.send(str(uuid.uuid4()).encode())
+    time.sleep(1)
 
 
 #todo, small window that shows while attempting to connect. automatically closes when client receives instruction to build window
