@@ -1,6 +1,13 @@
 import socket
 import time
-str
+import json
+import random
+
+width = 500
+height = 500
+white = (255, 255, 255)
+
+
 class Server:
     def __init__(self):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -11,33 +18,36 @@ class Server:
         self.initialized = False
         self.players = {}
         self.initializeGame()
-    
+
     def hostGame(self):
+
         pass
-        # check for connections before starting game
-        # while not self.game_over:
-        #     incoming = self.conn.recv(64)
-        #     if len(incoming) > 0:
-        #         print(incoming.decode())
-        #         self.conn.sendall("RESPONSE".encode())
+
     def initializeGame(self):
-        # establish two connections
-        # tell clients how to build the window
         while len(self.players) < 2:
             incoming = self.conn.recv(64)
             if len(incoming) > 0:
                 if incoming.decode() not in self.players:
                     self.players[incoming.decode()] = self.address[0]
-                    self.conn.sendall() #for now, sendall, later sendto
+                    response = {"INSTRUCTION": "WAIT",
+                                "WIDTH": width,
+                                "HEIGHT": height,
+                                "WAITING": False if len(self.players) >= 2 else True}
+                    response = json.dumps(response)
+                    self.conn.sendall(response.encode())
                 else:
-                    #client querying server before intialized
+                    # client querying server before intialized
                     pass
+        temp = [self.players.keys()]
+        random.shuffle(temp)
+        response = {"INSTRUCTION": "BUILD",
+                    "FIRST": temp[0],
+                    "SENT": time.time()}
+        response = json.dumps(response)
+        self.conn.send(response.encode())
+        time.sleep(2)  # wait for clients to build
+        self.hostGame()
 
-        # game width, and height
-        # client should add a username on its first handshake
-        # estabilsh game logic like who goes first etc
+
 if __name__ == '__main__':
     server = Server()
-            
-    
-

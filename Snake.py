@@ -14,8 +14,9 @@ class Board():
         pygame.display.set_caption("2PSnake")
 
 class Food:
-    def __init__(self, snake, squares: list):
+    def __init__(self, snake, squares: tuple):
         self.food = self.spawnFood(squares, snake)
+
     def draw(self):
         pygame.draw.rect(board.dis, (24, 252, 0), [self.food[0], self.food[1], 10, 10])
     
