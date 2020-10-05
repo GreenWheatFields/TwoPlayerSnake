@@ -21,7 +21,6 @@ class Server:
         self.initialized = False
         self.players = {}
         self.most_recent_message = None
-        # self.initializeGame()
 
 
     def listen(self):
@@ -36,17 +35,20 @@ class Server:
         while len(self.players) < 2:
             incoming = self.conn.recv(64)
             if len(incoming) > 0:
-                if incoming.decode() not in self.players:
-                    self.players[incoming.decode()] = self.address[0]
-                    response = {"INSTRUCTION": "WAIT",
-                                "WIDTH": width,
-                                "HEIGHT": height,
-                                "WAITING": False if len(self.players) >= 2 else True} #todo, sent start position of snake
-                    response = json.dumps(response)
-                    self.conn.sendall(response.encode())
-                else:
-                    # client querying server before intialized
-                    pass
+                print(incoming)
+                self.conn.sendall(str(time.time()).encode())
+                # if incoming.decode()[] not in self.players:
+                #     self.players[incoming.decode()] = self.address[0]
+                #     response = {"INSTRUCTION": "WAIT",
+                #                 "WIDTH": width,
+                #                 "HEIGHT": height,
+                #                 "WAITING": False if len(self.players) >= 2 else True} #todo, sent start position of snake
+                #     response = json.dumps(response)
+                #     self.conn.sendall(response.encode())
+                # print(incoming.decode())
+                # else:
+                #     # client querying server before intialized
+                #     pass
         temp = [self.players.keys()]
         random.shuffle(temp)
         response = {"INSTRUCTION": "BUILD",
@@ -110,6 +112,7 @@ class Snake():
 class Game(Server):
     def __init__(self):
         super().__init__()
+        self.initializeGame()
         self.score = 0
         self.squares = []
         x = ([1,2], [2,1])
