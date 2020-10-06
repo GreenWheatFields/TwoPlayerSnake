@@ -45,10 +45,8 @@ class Server:
         while len(self.players) < 2:
             incoming = self.conn.recv(1024)
             if len(incoming) > 0:
-                print(incoming.decode()[0])
                 # break
                 if incoming.decode()[0] not in self.players:
-                    print("here")
                     self.players[incoming.decode()[0]] = self.address[0]
                     response = {"INSTRUCTION": "WAIT",
                                 "WIDTH": width,
@@ -58,8 +56,9 @@ class Server:
                 else:
                     # client querying server before intialized
                     pass
+        print(self.players) #TODO!!!! incoming.decode()[0] not working as intended
 
-    def init_game(self):
+    def build_window_clientside(self):
         temp = [self.players.keys()]
         random.shuffle(temp)
         self.player1 = temp[0]
@@ -68,6 +67,7 @@ class Server:
                     "TIME": time.time()}
         response = json.dumps(response)
         self.conn.send(self.send_json(response))
+
         while not self.initialized:
             #wait for both clients to report as built and ready
             # self.incoming_message {Ready: True/False, "Time" : time, }
