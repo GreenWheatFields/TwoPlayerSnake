@@ -4,6 +4,7 @@ import json
 import random
 import pygame
 import threading
+import sys
 
 width = 500
 height = 500
@@ -16,12 +17,22 @@ class Server:
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.bind(('localhost', 8089))
         self.server_socket.listen(2)
-        self.conn, self.address = self.server_socket.accept() #stopping here
+        self.conn, self.address = self.server_socket.accept()  # stopping here
         self.game_over = False
         self.initialized = False
         self.players = {}
         self.most_recent_message = None
+        self.send_json = lambda x: json.dumps(x).encode()
+        self.player1 = None
+        self.incoming_message = None
 
+    def new_messsage(self):
+        incoming = self.conn.recv(1024)
+        if len(incoming) > 0:
+            self.incoming_message = json.loads(incoming.decode())
+            return True
+        else:
+            return False
 
     def listen(self):
         while True:
@@ -30,40 +41,46 @@ class Server:
                 print(response.decode())
                 self.most_recent_message = response.decode()
 
-
-    def initializeGame(self):
+    def establish_two_connections(self):
         while len(self.players) < 2:
-            incoming = self.conn.recv(64)
+            incoming = self.conn.recv(1024)
             if len(incoming) > 0:
-                print(incoming)
-                self.conn.sendall(str(time.time()).encode())
-                # if incoming.decode()[] not in self.players:
-                #     self.players[incoming.decode()] = self.address[0]
-                #     response = {"INSTRUCTION": "WAIT",
-                #                 "WIDTH": width,
-                #                 "HEIGHT": height,
-                #                 "WAITING": False if len(self.players) >= 2 else True} #todo, sent start position of snake
-                #     response = json.dumps(response)
-                #     self.conn.sendall(response.encode())
-                # print(incoming.decode())
-                # else:
-                #     # client querying server before intialized
-                #     pass
+                print(incoming.decode()[0])
+                # break
+                if incoming.decode()[0] not in self.players:
+                    print("here")
+                    self.players[incoming.decode()[0]] = self.address[0]
+                    response = {"INSTRUCTION": "WAIT",
+                                "WIDTH": width,
+                                "HEIGHT": height,
+                                "WAITING": False if len(self.players) >= 2 else True}  # todo, sent start position of snake
+                    self.conn.sendall(self.send_json(response))
+                else:
+                    # client querying server before intialized
+                    pass
+
+    def init_game(self):
         temp = [self.players.keys()]
         random.shuffle(temp)
+        self.player1 = temp[0]
         response = {"INSTRUCTION": "BUILD",
                     "FIRST": temp[0],
-                    "SENT": time.time()}
+                    "TIME": time.time()}
         response = json.dumps(response)
-        self.conn.send(response.encode())
-        time.sleep(2)  # wait for clients to build
-        self.hostGame()
+        self.conn.send(self.send_json(response))
+        while not self.initialized:
+            #wait for both clients to report as built and ready
+            # self.incoming_message {Ready: True/False, "Time" : time, }
+            if self.incoming_message():
+                # once both clients are built establish a time in the future for everyone to begin
+                pass
 
 
 class Board():
     def __init__(self):
         self.dis = pygame.display.set_mode((width, height))
         pygame.display.set_caption("2PSnake")
+
 
 class Food:
     def __init__(self, snake, squares: tuple):
@@ -112,13 +129,13 @@ class Snake():
 class Game(Server):
     def __init__(self):
         super().__init__()
-        self.initializeGame()
+        self.establish_two_connections()
         self.score = 0
         self.squares = []
-        x = ([1,2], [2,1])
-        for i in range(0,width, 10):
-            for j in range(0,height, 10):
-                self.squares.append([i,j])
+        x = ([1, 2], [2, 1])
+        for i in range(0, width, 10):
+            for j in range(0, height, 10):
+                self.squares.append([i, j])
         self.squares = tuple(self.squares)
 
     def start(self):
@@ -139,7 +156,7 @@ class Game(Server):
         listener.start()
         while not game_over:
             print(self.most_recent_message)
-            for event in pygame.event.get():    # replace events with periodic checks of incoming messages, needs to be on another thread
+            for event in pygame.event.get():  # replace events with periodic checks of incoming messages, needs to be on another thread
                 if event.type == pygame.QUIT:
                     game_over = True
                 if event.type == pygame.KEYDOWN:
@@ -157,7 +174,7 @@ class Game(Server):
                         y_change = 10
 
             if xPosistion > width - 10 or xPosistion < 0 or yPosistion >= height or yPosistion < 0:
-               self.end_game()
+                self.end_game()
             elif xPosistion == food.food[0] and yPosistion == food.food[1]:
                 snake.eat(food.food[0], food.food[1])
                 self.score += 1
@@ -175,9 +192,9 @@ class Game(Server):
             # board.dis.blit(v, [0, 0])
 
             response = {"SNAKEPOS": snake.snake,
-                       "FOODPOS": food.food,
-                       "SCORE": self.score,
-                       "TURN": False} #todo, figure out turn
+                        "FOODPOS": food.food,
+                        "SCORE": self.score,
+                        "TURN": False}  # todo, figure out turn
 
             # pygame.display.update()
             print("tick")
@@ -192,9 +209,8 @@ class Game(Server):
         quit()
 
 
-
-
 if __name__ == '__main__':
+
     game = Game()
     game.start()
     # while not game.initialized:
