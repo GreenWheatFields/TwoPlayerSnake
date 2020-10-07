@@ -45,9 +45,10 @@ class Server:
         while len(self.players) < 2:
             incoming = self.conn.recv(1024)
             if len(incoming) > 0:
-                # break
-                if incoming.decode()[0] not in self.players:
-                    self.players[incoming.decode()[0]] = self.address[0]
+                incoming = json.loads(incoming.decode())
+                temp = incoming["userName"] not in self.players #todo, catch typeerror here
+                if temp:
+                    self.players[incoming["userName"]] = self.address[0]
                     response = {"INSTRUCTION": "WAIT",
                                 "WIDTH": width,
                                 "HEIGHT": height,
@@ -56,8 +57,8 @@ class Server:
                 else:
                     # client querying server before intialized
                     pass
-        print(self.players) #TODO!!!! incoming.decode()[0] not working as intended
-
+        print(self.players)
+        sys.exit(1)
     def build_window_clientside(self):
         temp = [self.players.keys()]
         random.shuffle(temp)

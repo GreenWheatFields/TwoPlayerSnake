@@ -39,20 +39,27 @@ class Client:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.user_name = None
         self.awaiting_response = True
+        self.stage_message = lambda x: json.loads(x.decode())
 
     def establish_connection(self):
-        self.user_name = uuid.uuid4()
+        # self.user_name = uuid.uuid4()
         self.socket.connect(('localhost', 8089))
-        response = {"userName": str(self.user_name),
+
+    def init(self):
+        response = {"userName": str(uuid.uuid4()),
                     "time": time.time()}
         response = json.dumps(response).encode()
         self.socket.send(response)
         while self.awaiting_response:
             incoming = self.socket.recv(1024)
             if len(incoming) > 0:
-                print(incoming)
+                incoming = self.stage_message(incoming)
+                print(type(incoming))
+                time.sleep(1)
+                self.init()
                 # self.awaiting_response = False
-            self.socket.send(str(time.time()).encode())
+            # self.socket.send(str(time.time()).encode())
+
 class Board():
     def __init__(self):
         self.dis = pygame.display.set_mode((width, height))
@@ -107,6 +114,7 @@ class Game(Client):
     def __init__(self):
         super().__init__()
         self.establish_connection()
+        self.init()
         self.score = 0
         self.squares = []
         x = ([1, 2], [2, 1])
