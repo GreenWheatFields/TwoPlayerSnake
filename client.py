@@ -3,6 +3,7 @@ import time
 import uuid
 import json
 import pygame
+import sys
 
 # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # s.connect(('localhost', 8089))
@@ -38,8 +39,11 @@ class Client:
     def __init__(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.user_name = None
-        self.awaiting_response = True
         self.stage_message = lambda x: json.loads(x.decode())
+        self.width = 0
+        self.height = 0
+        self.ping = 0
+        self.to_json = lambda x: json.dumps(x).encode()
 
     def establish_connection(self):
         # self.user_name = uuid.uuid4()
@@ -50,15 +54,35 @@ class Client:
                     "time": time.time()}
         response = json.dumps(response).encode()
         self.socket.send(response)
-        while self.awaiting_response:
+        while True:
             incoming = self.socket.recv(1024)
             if len(incoming) > 0:
                 incoming = self.stage_message(incoming)
-                print(type(incoming))
-                time.sleep(1)
-                self.init()
-                # self.awaiting_response = False
-            # self.socket.send(str(time.time()).encode())
+                print(incoming)
+                if incoming["INSTRUCTION"] == "BUILD":
+                    print("here")
+                    if self.width != 0 and self.height != 0:
+                        break
+                    pass
+                elif incoming["INSTRUCTION"] == "WAIT":
+                    print("here2")
+                    # parse then/ wait for response
+                    self.width = incoming["WIDTH"]
+                    self.height = incoming["HEIGHT"]
+                    self.ping = time.time() - incoming["TIME"]
+                    response = {"userName": str(uuid.uuid4()),
+                                "time": time.time()}
+                    self.socket.sendall(self.to_json(response))
+                else:
+                    # error
+                    pass
+        self.init_build()
+
+    def init_build(self):
+        print("BUILDING")
+        sys.exit()
+        # parse start time, window size, snake position, other player name, ping, etc
+
 
 class Board():
     def __init__(self):
@@ -188,4 +212,3 @@ class Game(Client):
 if __name__ == '__main__':
     g = Game()
     g.start()
-

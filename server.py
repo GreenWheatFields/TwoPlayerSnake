@@ -22,7 +22,7 @@ class Server:
         self.initialized = False
         self.players = {}
         self.most_recent_message = None
-        self.send_json = lambda x: json.dumps(x).encode()
+        self.to_json = lambda x: json.dumps(x).encode()  # could be a static method to be used by the client
         self.player1 = None
         self.incoming_message = None
 
@@ -42,35 +42,39 @@ class Server:
                 self.most_recent_message = response.decode()
 
     def establish_two_connections(self):
+
+        response = {"INSTRUCTION": "WAIT",
+                    "WIDTH": width,
+                    "HEIGHT": height,
+                    "WAITING": True}  # todo, sent start position of snake
+
         while len(self.players) < 2:
             incoming = self.conn.recv(1024)
             if len(incoming) > 0:
                 incoming = json.loads(incoming.decode())
-                temp = incoming["userName"] not in self.players #todo, catch typeerror here
+                temp = incoming["userName"] not in self.players  # todo, catch typeerror here
                 if temp:
                     self.players[incoming["userName"]] = self.address[0]
-                    response = {"INSTRUCTION": "WAIT",
-                                "WIDTH": width,
-                                "HEIGHT": height,
-                                "WAITING": False if len(self.players) >= 2 else True}  # todo, sent start position of snake
-                    self.conn.sendall(self.send_json(response))
+                    response["WAITING"] = False if len(self.players) >= 2 else True
+                    response["TIME"] = time.time()
+                    self.conn.sendall(self.to_json(response))
                 else:
-                    # client querying server before intialized
-                    pass
+                    response["TIME"] = time.time()
+                    self.conn.sendall(self.to_json(response))
         print(self.players)
-        sys.exit(1)
+        self.build_window_clientside()
+
     def build_window_clientside(self):
         temp = [self.players.keys()]
         random.shuffle(temp)
         self.player1 = temp[0]
         response = {"INSTRUCTION": "BUILD",
-                    "FIRST": temp[0],
+                    "FIRST": str(temp[0]),
                     "TIME": time.time()}
-        response = json.dumps(response)
-        self.conn.send(self.send_json(response))
-
+        self.conn.sendall(self.to_json(response))
+        sys.exit()
         while not self.initialized:
-            #wait for both clients to report as built and ready
+            # wait for both clients to report as built and ready
             # self.incoming_message {Ready: True/False, "Time" : time, }
             if self.incoming_message():
                 # once both clients are built establish a time in the future for everyone to begin
@@ -211,7 +215,6 @@ class Game(Server):
 
 
 if __name__ == '__main__':
-
     game = Game()
     game.start()
     # while not game.initialized:
