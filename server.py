@@ -5,6 +5,7 @@ import random
 import pygame
 import threading
 import sys
+from client import Client
 
 width = 500
 height = 500
@@ -22,9 +23,11 @@ class Server:
         self.initialized = False
         self.players = {}
         self.most_recent_message = None
-        self.to_json = lambda x: json.dumps(x).encode()  # could be a static method to be used by the client
+        # self.to_json = lambda x: json.dumps(x).encode()  # could be a static method to be used by the client
         self.player1 = None
         self.incoming_message = None
+
+
 
     def new_messsage(self):
         incoming = self.conn.recv(1024)
@@ -57,10 +60,10 @@ class Server:
                     self.players[incoming["userName"]] = self.address[0]
                     response["WAITING"] = False if len(self.players) >= 2 else True
                     response["TIME"] = time.time()
-                    self.conn.sendall(self.to_json(response))
+                    self.conn.sendall(Client.send_json(response))
                 else:
                     response["TIME"] = time.time()
-                    self.conn.sendall(self.to_json(response))
+                    self.conn.sendall(Client.send_json(response))
         print(self.players)
         self.build_window_clientside()
 
@@ -71,7 +74,7 @@ class Server:
         response = {"INSTRUCTION": "BUILD",
                     "FIRST": str(temp[0]),
                     "TIME": time.time()}
-        self.conn.sendall(self.to_json(response))
+        self.conn.sendall(Client.send_json(response))
         sys.exit()
         while not self.initialized:
             # wait for both clients to report as built and ready

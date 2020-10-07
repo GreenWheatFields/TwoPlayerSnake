@@ -5,6 +5,7 @@ import json
 import pygame
 import sys
 
+
 # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # s.connect(('localhost', 8089))
 # usename = str(uuid.uuid4())
@@ -39,11 +40,18 @@ class Client:
     def __init__(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.user_name = None
-        self.stage_message = lambda x: json.loads(x.decode())
         self.width = 0
         self.height = 0
         self.ping = 0
-        self.to_json = lambda x: json.dumps(x).encode()
+        # self.to_json = lambda x: json.dumps(x).encode()
+
+    @staticmethod
+    def send_json(x):
+        return json.dumps(x).encode()
+
+    @staticmethod
+    def read_json(x):
+        return json.loads(x.decode())
 
     def establish_connection(self):
         # self.user_name = uuid.uuid4()
@@ -57,7 +65,7 @@ class Client:
         while True:
             incoming = self.socket.recv(1024)
             if len(incoming) > 0:
-                incoming = self.stage_message(incoming)
+                incoming = self.read_json(incoming)
                 print(incoming)
                 if incoming["INSTRUCTION"] == "BUILD":
                     print("here")
@@ -72,7 +80,7 @@ class Client:
                     self.ping = time.time() - incoming["TIME"]
                     response = {"userName": str(uuid.uuid4()),
                                 "time": time.time()}
-                    self.socket.sendall(self.to_json(response))
+                    self.socket.sendall(self.send_json(response))
                 else:
                     # error
                     pass
