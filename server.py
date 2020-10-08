@@ -74,12 +74,10 @@ class Server:
         response = {"INSTRUCTION": "BUILD",
                     "FIRST": str(temp[0]),
                     "TIME": time.time()}
-        self.conn.sendall(Client.send_json(response))
-        sys.exit()
         while not self.initialized:
             # wait for both clients to report as built and ready
             # self.incoming_message {Ready: True/False, "Time" : time, }
-            if self.incoming_message():
+            if self.incoming_message == None:
                 # once both clients are built establish a time in the future for everyone to begin
                 pass
 

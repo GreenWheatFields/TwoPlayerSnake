@@ -52,6 +52,14 @@ class Client:
     @staticmethod
     def read_json(x):
         return json.loads(x.decode())
+    # @staticmethod
+    # def wait_for_input(socket: socket.socket):
+    #     while True:
+    #         incoming = socket.recv(1024)
+    #         if len(incoming) > 0:
+    #             incoming.decode()
+    #             return True
+            
 
     def establish_connection(self):
         # self.user_name = uuid.uuid4()
