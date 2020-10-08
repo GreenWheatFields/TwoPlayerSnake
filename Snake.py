@@ -34,6 +34,9 @@ class Snake():
         self.board = board
         pygame.draw.rect(board.dis, white, [x, y, 10, 10])
         self.snake = [[x, y]]
+    
+    
+        
 
     def draw(self, newX, newY):
         self.snake.append([newX, newY])
@@ -126,7 +129,6 @@ class Game:
     def game_over(self):
         pygame.quit()
         quit()
-
 
 if __name__ == '__main__':
     g = Game()

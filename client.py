@@ -52,13 +52,19 @@ class Client:
     @staticmethod
     def read_json(x):
         return json.loads(x.decode())
-    # @staticmethod
-    # def wait_for_input(socket: socket.socket):
-    #     while True:
-    #         incoming = socket.recv(1024)
-    #         if len(incoming) > 0:
-    #             incoming.decode()
-    #             return True
+    @staticmethod
+    def wait_for_message(socket: socket.socket):
+        #todo,timeout?
+        incoming = None
+        while incoming == None:
+            incoming = socket.recv(1024)
+            if len(incoming) > 0:
+                response = Game.read_json(socket)
+                return response
+            else:
+                incoming = None
+            
+
             
 
     def establish_connection(self):
@@ -71,27 +77,24 @@ class Client:
         response = json.dumps(response).encode()
         self.socket.send(response)
         while True:
-            incoming = self.socket.recv(1024)
-            if len(incoming) > 0:
-                incoming = self.read_json(incoming)
-                print(incoming)
-                if incoming["INSTRUCTION"] == "BUILD":
-                    print("here")
-                    if self.width != 0 and self.height != 0:
-                        break
-                    pass
-                elif incoming["INSTRUCTION"] == "WAIT":
-                    print("here2")
-                    # parse then/ wait for response
-                    self.width = incoming["WIDTH"]
-                    self.height = incoming["HEIGHT"]
-                    self.ping = time.time() - incoming["TIME"]
-                    response = {"userName": str(uuid.uuid4()),
-                                "time": time.time()}
-                    self.socket.sendall(self.send_json(response))
-                else:
-                    # error
-                    pass
+            incoming = self.wait_for_message(self.socket)
+            if incoming["INSTRUCTION"] == "BUILD":
+                print("here")
+                if self.width != 0 and self.height != 0:
+                    break
+                pass
+            elif incoming["INSTRUCTION"] == "WAIT":
+                print("here2")
+                # parse then/ wait for response
+                self.width = incoming["WIDTH"]
+                self.height = incoming["HEIGHT"]
+                self.ping = time.time() - incoming["TIME"]
+                response = {"userName": str(uuid.uuid4()),
+                            "time": time.time()}
+                self.socket.sendall(self.send_json(response))
+            else:
+                # error
+                pass
         self.init_build()
 
     def init_build(self):

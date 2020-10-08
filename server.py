@@ -18,7 +18,7 @@ class Server:
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.bind(('localhost', 8089))
         self.server_socket.listen(2)
-        self.conn, self.address = self.server_socket.accept()  # stopping here
+        self.conn, self.address = self.server_socket.accept()  # todo when testing with multiple ips, does this variable change?
         self.game_over = False
         self.initialized = False
         self.players = {}
@@ -52,20 +52,19 @@ class Server:
                     "WAITING": True}  # todo, sent start position of snake
 
         while len(self.players) < 2:
-            incoming = self.conn.recv(1024)
-            if len(incoming) > 0:
-                incoming = json.loads(incoming.decode())
-                temp = incoming["userName"] not in self.players  # todo, catch typeerror here
-                if temp:
-                    self.players[incoming["userName"]] = self.address[0]
-                    response["WAITING"] = False if len(self.players) >= 2 else True
-                    response["TIME"] = time.time()
-                    self.conn.sendall(Client.send_json(response))
-                else:
-                    response["TIME"] = time.time()
-                    self.conn.sendall(Client.send_json(response))
-        print(self.players)
-        self.build_window_clientside()
+            incoming = Client.wait_for_message()
+            temp = incoming["userName"] not in self.players  # todo, catch typeerror here
+            if temp:
+                self.players[incoming["userName"]] = self.address[0]
+                response["WAITING"] = False if len(self.players) >= 2 else True
+                response["TIME"] = time.time()
+                self.conn.sendall(Client.send_json(response))
+            else:
+                response["TIME"] = time.time()
+                self.conn.sendall(Client.send_json(response))
+            
+            print(self.players)
+            self.build_window_clientside()
 
     def build_window_clientside(self):
         temp = [self.players.keys()]
@@ -74,12 +73,27 @@ class Server:
         response = {"INSTRUCTION": "BUILD",
                     "FIRST": str(temp[0]),
                     "TIME": time.time()}
+                    #todo, send snake position
         while not self.initialized:
             # wait for both clients to report as built and ready
             # self.incoming_message {Ready: True/False, "Time" : time, }
-            if self.incoming_message == None:
-                # once both clients are built establish a time in the future for everyone to begin
-                pass
+            players_ready = {}
+            while players_ready < 2:
+                self.incoming_message = Client.wait_for_message()
+                if self.incoming_message["READY"]:
+                    if self.incoming_message["USERNAME"] in self.players and self.incoming_message["USERNAME"] not in players_ready:
+                        players_ready[self.incoming_message["USERNAME"]] = True
+                        #wait instruction
+                    else:
+                        pass
+    def sync(self):
+        #todo, clients ready pick a time to start
+        pass
+                    
+
+
+            
+            
 
 
 class Board():
