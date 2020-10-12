@@ -10,6 +10,7 @@ def test1():
 def test2():
     g = client_game()
     g.start()
+
 if __name__ == "__main__":
     x = threading.Thread(target=test1)
     y = threading.Thread(target=test2)

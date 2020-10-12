@@ -5,7 +5,6 @@ import json
 import pygame
 import sys
 
-
 # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # s.connect(('localhost', 8089))
 # usename = str(uuid.uuid4())
@@ -32,8 +31,8 @@ import pygame
 import random
 
 white = (255, 255, 255)
-width, height = 500, 500
 global board
+
 
 
 class Client:
@@ -43,6 +42,8 @@ class Client:
         self.width = 0
         self.height = 0
         self.ping = 0
+        self.build = False
+        self.first = None
         # self.to_json = lambda x: json.dumps(x).encode()
 
     @staticmethod
@@ -52,9 +53,10 @@ class Client:
     @staticmethod
     def read_json(x):
         return json.loads(x.decode())
+
     @staticmethod
     def wait_for_message(socket: socket.socket):
-        #todo,timeout?
+        # todo,timeout?
         incoming = None
         while incoming == None:
             incoming = socket.recv(1024)
@@ -63,7 +65,6 @@ class Client:
                 return response
             else:
                 incoming = None
-            
 
     def establish_connection(self):
         # self.user_name = uuid.uuid4()
@@ -76,28 +77,30 @@ class Client:
         while True:
             incoming = self.wait_for_message(self.socket)
             if incoming["INSTRUCTION"] == "BUILD":
-                print("here")
-            elif incoming["INSTRUCTION"] == "WAIT":
-                print("wait instruction")
                 self.width = incoming["WIDTH"]
                 self.height = incoming["HEIGHT"]
-                self.ping = time.time() - incoming["TIME"]
-                response = {"userName": str(uuid.uuid4()),
-                            "time": time.time()}
-                self.socket.sendall(self.send_json(response))
+                self.first = incoming["FIRST"]
+                break
+            elif incoming["INSTRUCTION"] == "WAIT":
+                print("wait instruction")
+                # self.ping = time.time() - incoming["TIME"]
+                # response = {"userName": str(uuid.uuid4()),
+                #             "time": time.time()}
+                # self.socket.sendall(self.send_json(response))
             else:
                 # error
                 pass
-        self.init_build()
+        self.prepare_build()
 
-    def init_build(self):
-        print("BUILDING")
-        sys.exit()
+    def prepare_build(self):
+        # todo, notify server build was succesful
+        if self.width != 0 and self.height != 0:
+            self.build = True
         # parse start time, window size, snake position, other player name, ping, etc
 
 
 class Board():
-    def __init__(self):
+    def __init__(self, width, height):
         self.dis = pygame.display.set_mode((width, height))
         pygame.display.set_caption("2PSnake")
 
@@ -151,28 +154,31 @@ class Game(Client):
         super().__init__()
         self.establish_connection()
         self.init_game()
+        while not self.build:
+            continue
         self.score = 0
         self.squares = []
         x = ([1, 2], [2, 1])
-        for i in range(0, width, 10):
-            for j in range(0, height, 10):
+        for i in range(0, self.width, 10):
+            for j in range(0, self.height, 10):
                 self.squares.append([i, j])
         self.squares = tuple(self.squares)
+        self.start()
 
     def start(self):
-        pygame.init()  # init outside class?
+        pygame.init()
         global board
-        board = Board()
+        board = Board(self.width, self.height)
         game_over = False
         x_change = y_change = 0
-
         xPosistion = 200
         yPosistion = 150
         clock = pygame.time.Clock()
         snake = Snake(xPosistion, yPosistion, board)
         food = Food(snake.snake, self.squares)
         s = pygame.font.SysFont("comicsansms", 25)
-
+        print("time to wait")
+        time.sleep(10)
         while not game_over:
             for event in pygame.event.get():
                 print(event)
@@ -192,7 +198,7 @@ class Game(Client):
                         x_change = 0
                         y_change = 10
             print(xPosistion, yPosistion)
-            if xPosistion > width - 10 or xPosistion < 0 or yPosistion >= height or yPosistion < 0:
+            if xPosistion > self.width - 10 or xPosistion < 0 or yPosistion >= self.height or yPosistion < 0:
                 self.game_over()
             elif xPosistion == food.food[0] and yPosistion == food.food[1]:
                 snake.eat(food.food[0], food.food[1])

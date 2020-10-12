@@ -27,7 +27,8 @@ class Server:
         self.player1 = None
         self.incoming_message = None
 
-
+        self.food = None
+        self.snake = None
 
     def new_messsage(self):
         incoming = self.conn.recv(1024)
@@ -62,7 +63,7 @@ class Server:
             else:
                 response["TIME"] = time.time()
                 self.conn.sendall(Client.send_json(response))
-            
+
             print("ESTABLISHED TWO CONNS")
             self.build_window_clientside()
 
@@ -70,12 +71,16 @@ class Server:
         temp = [self.players.keys()]
         random.shuffle(temp)
         self.player1 = temp[0]
+
+        self.snake = Snake(200,150)
+        self.food = Food
         response = {"INSTRUCTION": "BUILD",
                     "FIRST": str(temp[0]),
                     "WIDTH": width,
                     "HEIGHT": height,
-                    "TIME": time.time()}
-                    #todo, send snake position
+                    "TIME": time.time(),
+                    }
+        # todo, send snake position
         self.conn.sendall(Client.send_json(response))
         while not self.initialized:
             # wait for both clients to report as built and ready
@@ -91,20 +96,15 @@ class Server:
                             pass
                 except KeyError:
                     pass
+
     def sync(self):
-        start_time = time.time() + 5 
+        start_time = time.time() + 5
         message = {
             "INSTRUCTION": "PLAY",
-            "STARTTIME": str(start_time)            
+            "STARTTIME": str(start_time)
         }
         self.conn.sendall(Client.send_json(message))
         sys.exit()
-        
-                    
-
-
-            
-            
 
 
 class Board():
@@ -130,16 +130,16 @@ class Food:
 
 
 class Snake():
-    def __init__(self, x: int, y: int, board: Board):
-        self.board = board
-        pygame.draw.rect(board.dis, white, [x, y, 10, 10])
+    def __init__(self, x: int, y: int):
+        # self.board = board
+        # pygame.draw.rect(board.dis, white, [x, y, 10, 10])
         self.snake = [[x, y]]
 
     def draw(self, newX, newY):
         self.snake.append([newX, newY])
         self.snake.pop(0)
-        for i in self.snake:
-            pygame.draw.rect(self.board.dis, white, [i[0], i[1], 10, 10])
+        # for i in self.snake:
+        #     pygame.draw.rect(self.board.dis, white, [i[0], i[1], 10, 10])
 
     def eat(self, x, y):
         self.snake.append([x, y])
