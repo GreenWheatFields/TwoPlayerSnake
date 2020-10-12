@@ -72,13 +72,23 @@ class Server:
         random.shuffle(temp)
         self.player1 = temp[0]
 
-        self.snake = Snake(200,150)
-        self.food = Food
+        self.squares = []
+        x = ([1, 2], [2, 1])
+        for i in range(0, width, 10):
+            for j in range(0, height, 10):
+                self.squares.append([i, j])
+        self.squares = tuple(self.squares)
+
+        self.snake = Snake(200, 150)
+        self.food = Food(self.snake.snake, self.squares)
+
         response = {"INSTRUCTION": "BUILD",
                     "FIRST": str(temp[0]),
                     "WIDTH": width,
                     "HEIGHT": height,
                     "TIME": time.time(),
+                    "SNAKE": self.snake.snake,
+                    "FOOD": self.food.food
                     }
         # todo, send snake position
         self.conn.sendall(Client.send_json(response))
@@ -117,8 +127,8 @@ class Food:
     def __init__(self, snake, squares: tuple):
         self.food = self.spawnFood(squares, snake)
 
-    def draw(self):
-        pygame.draw.rect(board.dis, (24, 252, 0), [self.food[0], self.food[1], 10, 10])
+    # def draw(self):
+    #     pygame.draw.rect(board.dis, (24, 252, 0), [self.food[0], self.food[1], 10, 10])
 
     def spawnFood(self, squares, snake):
         valid_squares = list(squares)

@@ -44,7 +44,8 @@ class Client:
         self.ping = 0
         self.build = False
         self.first = None
-        # self.to_json = lambda x: json.dumps(x).encode()
+        self.start_snake = None
+        self.start_food = None
 
     @staticmethod
     def send_json(x):
@@ -80,6 +81,9 @@ class Client:
                 self.width = incoming["WIDTH"]
                 self.height = incoming["HEIGHT"]
                 self.first = incoming["FIRST"]
+                self.start_snake = incoming["SNAKE"]
+                self.start_food = incoming["FOOD"]
+                print(self.start_snake[0][1])
                 break
             elif incoming["INSTRUCTION"] == "WAIT":
                 print("wait instruction")
@@ -106,8 +110,11 @@ class Board():
 
 
 class Food:
-    def __init__(self, snake, squares: tuple):
-        self.food = self.spawnFood(squares, snake)
+    def __init__(self, snake, squares: tuple, pos=None):
+        if pos is not None:
+            self.food = pos
+        else:
+            self.food = self.spawnFood(squares, snake)
 
     def draw(self):
         pygame.draw.rect(board.dis, (24, 252, 0), [self.food[0], self.food[1], 10, 10])
@@ -156,6 +163,7 @@ class Game(Client):
         self.init_game()
         while not self.build:
             continue
+            #todo, send ready message here
         self.score = 0
         self.squares = []
         x = ([1, 2], [2, 1])
@@ -174,10 +182,11 @@ class Game(Client):
         xPosistion = 200
         yPosistion = 150
         clock = pygame.time.Clock()
-        snake = Snake(xPosistion, yPosistion, board)
-        food = Food(snake.snake, self.squares)
+        snake = Snake(self.start_snake[0][0], self.start_snake[0][1], board)
+        food = Food(snake.snake, self.squares, pos=self.start_food)
         s = pygame.font.SysFont("comicsansms", 25)
         print("time to wait")
+        #todo, show snake and food while waiting
         time.sleep(10)
         while not game_over:
             for event in pygame.event.get():
