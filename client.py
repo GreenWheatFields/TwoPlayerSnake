@@ -59,33 +59,26 @@ class Client:
         while incoming == None:
             incoming = socket.recv(1024)
             if len(incoming) > 0:
-                response = Game.read_json(socket)
+                response = Game.read_json(incoming)
                 return response
             else:
                 incoming = None
-            
-
             
 
     def establish_connection(self):
         # self.user_name = uuid.uuid4()
         self.socket.connect(('localhost', 8089))
 
-    def init(self):
+    def init_game(self):
         response = {"userName": str(uuid.uuid4()),
                     "time": time.time()}
-        response = json.dumps(response).encode()
-        self.socket.send(response)
+        self.socket.send(self.send_json(response))
         while True:
             incoming = self.wait_for_message(self.socket)
             if incoming["INSTRUCTION"] == "BUILD":
                 print("here")
-                if self.width != 0 and self.height != 0:
-                    break
-                pass
             elif incoming["INSTRUCTION"] == "WAIT":
-                print("here2")
-                # parse then/ wait for response
+                print("wait instruction")
                 self.width = incoming["WIDTH"]
                 self.height = incoming["HEIGHT"]
                 self.ping = time.time() - incoming["TIME"]
@@ -157,7 +150,7 @@ class Game(Client):
     def __init__(self):
         super().__init__()
         self.establish_connection()
-        self.init()
+        self.init_game()
         self.score = 0
         self.squares = []
         x = ([1, 2], [2, 1])

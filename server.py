@@ -52,7 +52,7 @@ class Server:
                     "WAITING": True}  # todo, sent start position of snake
 
         while len(self.players) < 2:
-            incoming = Client.wait_for_message()
+            incoming = Client.wait_for_message(self.conn)
             temp = incoming["userName"] not in self.players  # todo, catch typeerror here
             if temp:
                 self.players[incoming["userName"]] = self.address[0]
@@ -63,7 +63,7 @@ class Server:
                 response["TIME"] = time.time()
                 self.conn.sendall(Client.send_json(response))
             
-            print(self.players)
+            print("ESTABLISHED TWO CONNS")
             self.build_window_clientside()
 
     def build_window_clientside(self):
@@ -72,23 +72,34 @@ class Server:
         self.player1 = temp[0]
         response = {"INSTRUCTION": "BUILD",
                     "FIRST": str(temp[0]),
+                    "WIDTH": width,
+                    "HEIGHT": height,
                     "TIME": time.time()}
                     #todo, send snake position
+        self.conn.sendall(Client.send_json(response))
         while not self.initialized:
             # wait for both clients to report as built and ready
-            # self.incoming_message {Ready: True/False, "Time" : time, }
             players_ready = {}
-            while players_ready < 2:
-                self.incoming_message = Client.wait_for_message()
-                if self.incoming_message["READY"]:
-                    if self.incoming_message["USERNAME"] in self.players and self.incoming_message["USERNAME"] not in players_ready:
-                        players_ready[self.incoming_message["USERNAME"]] = True
-                        #wait instruction
-                    else:
-                        pass
+            while len(players_ready) < 2:
+                self.incoming_message = Client.wait_for_message(self.conn)
+                try:
+                    if self.incoming_message["READY"]:
+                        print("READY MESSAGE")
+                        if self.incoming_message["USERNAME"] not in players_ready:
+                            players_ready[self.incoming_message["USERNAME"]] = True
+                        else:
+                            pass
+                except KeyError:
+                    pass
     def sync(self):
-        #todo, clients ready pick a time to start
-        pass
+        start_time = time.time() + 5 
+        message = {
+            "INSTRUCTION": "PLAY",
+            "STARTTIME": str(start_time)            
+        }
+        self.conn.sendall(Client.send_json(message))
+        sys.exit()
+        
                     
 
 
