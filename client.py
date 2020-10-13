@@ -46,6 +46,7 @@ class Client:
         self.first = None
         self.start_snake = None
         self.start_food = None
+        self.start_time = None
 
     @staticmethod
     def send_json(x):
@@ -83,10 +84,10 @@ class Client:
                 self.first = incoming["FIRST"]
                 self.start_snake = incoming["SNAKE"]
                 self.start_food = incoming["FOOD"]
-                print(self.start_snake[0][1])
                 break
             elif incoming["INSTRUCTION"] == "WAIT":
                 print("wait instruction")
+                continue
                 # self.ping = time.time() - incoming["TIME"]
                 # response = {"userName": str(uuid.uuid4()),
                 #             "time": time.time()}
@@ -97,12 +98,23 @@ class Client:
         self.prepare_build()
 
     def prepare_build(self):
+        # declare variables here
         # todo, notify server build was succesful
         if self.width != 0 and self.height != 0:
             self.build = True
-        # parse start time, window size, snake position, other player name, ping, etc
 
-
+    def notify_and_sync(self):
+        message = {"READY": True,
+                   "TIME": time.time()}
+        self.socket.sendall(self.send_json(message))
+        while True:
+            incoming = self.wait_for_message(self.socket)
+            if incoming["INSTRUCTION"] == "PLAY":
+                self.start_time = incoming["STARTTIME"]
+                break
+            else:
+                continue
+        self.socket.sendall(self.send_json({"PLACEHOLDER": True}))
 class Board():
     def __init__(self, width, height):
         self.dis = pygame.display.set_mode((width, height))
@@ -163,7 +175,7 @@ class Game(Client):
         self.init_game()
         while not self.build:
             continue
-            #todo, send ready message here
+        self.notify_and_sync()
         self.score = 0
         self.squares = []
         x = ([1, 2], [2, 1])
@@ -184,13 +196,16 @@ class Game(Client):
         clock = pygame.time.Clock()
         snake = Snake(self.start_snake[0][0], self.start_snake[0][1], board)
         food = Food(snake.snake, self.squares, pos=self.start_food)
+        food.draw()
+        snake.draw(snake.snake[0][0], snake.snake[0][1])
+        pygame.display.update()
         s = pygame.font.SysFont("comicsansms", 25)
-        print("time to wait")
-        #todo, show snake and food while waiting
-        time.sleep(10)
+        print("about to wait")
+        while time.time() < float(self.start_time):
+            continue
         while not game_over:
             for event in pygame.event.get():
-                print(event)
+                self.socket.sendall(self.send_json({"EVENT":str(event)}))
                 if event.type == pygame.QUIT:
                     game_over = True
                 if event.type == pygame.KEYDOWN:

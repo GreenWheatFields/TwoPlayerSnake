@@ -23,12 +23,12 @@ class Server:
         self.initialized = False
         self.players = {}
         self.most_recent_message = None
-        # self.to_json = lambda x: json.dumps(x).encode()  # could be a static method to be used by the client
         self.player1 = None
         self.incoming_message = None
 
         self.food = None
         self.snake = None
+        self.start_time = 0
 
     def new_messsage(self):
         incoming = self.conn.recv(1024)
@@ -46,7 +46,6 @@ class Server:
                 self.most_recent_message = response.decode()
 
     def establish_two_connections(self):
-
         response = {"INSTRUCTION": "WAIT",
                     "WIDTH": width,
                     "HEIGHT": height,
@@ -100,21 +99,26 @@ class Server:
                 try:
                     if self.incoming_message["READY"]:
                         print("READY MESSAGE")
-                        if self.incoming_message["USERNAME"] not in players_ready:
-                            players_ready[self.incoming_message["USERNAME"]] = True
-                        else:
-                            pass
+                        self.initialized = True
+                        break
+                        # if self.incoming_message["USERNAME"] not in players_ready:
+                        #     players_ready[self.incoming_message["USERNAME"]] = True
+                        # else:
+                        #     pass
                 except KeyError:
                     pass
+        self.sync()
 
     def sync(self):
-        start_time = time.time() + 5
+        self.start_time = time.time() + 5
         message = {
             "INSTRUCTION": "PLAY",
-            "STARTTIME": str(start_time)
+            "STARTTIME": str(self.start_time)
         }
         self.conn.sendall(Client.send_json(message))
-        sys.exit()
+        while True:
+            self.incoming_message = Client.wait_for_message(self.conn)
+            break #assuming a good response
 
 
 class Board():
@@ -178,9 +182,11 @@ class Game(Server):
             for j in range(0, height, 10):
                 self.squares.append([i, j])
         self.squares = tuple(self.squares)
+        print("here7")
+        self.start()
 
     def start(self):
-        # pygame.init()
+        pygame.init()
         global board
         board = Board()
         game_over = False
@@ -192,7 +198,8 @@ class Game(Server):
         snake = Snake(xPosistion, yPosistion, board)
         food = Food(snake.snake, self.squares)
         # s = pygame.font.SysFont("comicsansms",25)
-        # game should start a time in the future
+        while time.time() < self.start_time:
+            continue
         listener = threading.Thread(target=self.listen)
         listener.start()
         while not game_over:
