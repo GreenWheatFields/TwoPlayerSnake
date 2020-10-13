@@ -174,7 +174,8 @@ class Snake():
 class Game(Server):
     def __init__(self):
         super().__init__()
-        self.establish_two_connections()
+        self.establish_two_connections
+        #todo, cant leave this method ^
         self.score = 0
         self.squares = []
         x = ([1, 2], [2, 1])
@@ -182,7 +183,6 @@ class Game(Server):
             for j in range(0, height, 10):
                 self.squares.append([i, j])
         self.squares = tuple(self.squares)
-        print("here7")
         self.start()
 
     def start(self):
