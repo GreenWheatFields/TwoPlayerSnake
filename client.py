@@ -205,6 +205,7 @@ class Game(Client):
             continue
         while not game_over:
             for event in pygame.event.get():
+                print(event)
                 self.socket.sendall(self.send_json({"EVENT":str(event)}))
                 if event.type == pygame.QUIT:
                     game_over = True

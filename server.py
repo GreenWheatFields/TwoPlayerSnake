@@ -42,7 +42,6 @@ class Server:
         while True:
             response = self.conn.recv(1024)
             if len(response) > 0:
-                print(response.decode())
                 self.most_recent_message = response.decode()
 
     def establish_two_connections(self):
@@ -59,12 +58,14 @@ class Server:
                 response["WAITING"] = False if len(self.players) >= 2 else True
                 response["TIME"] = time.time()
                 self.conn.sendall(Client.send_json(response))
+                break
+                #todo, breaking prematurely for the sake of testing
             else:
                 response["TIME"] = time.time()
                 self.conn.sendall(Client.send_json(response))
 
-            print("ESTABLISHED TWO CONNS")
-            self.build_window_clientside()
+        print("ESTABLISHED TWO CONNS")
+        self.build_window_clientside()
 
     def build_window_clientside(self):
         temp = [self.players.keys()]
@@ -110,7 +111,7 @@ class Server:
         self.sync()
 
     def sync(self):
-        self.start_time = time.time() + 5
+        self.start_time = time.time() + 2
         message = {
             "INSTRUCTION": "PLAY",
             "STARTTIME": str(self.start_time)
@@ -128,8 +129,11 @@ class Board():
 
 
 class Food:
-    def __init__(self, snake, squares: tuple):
-        self.food = self.spawnFood(squares, snake)
+    def __init__(self, snake, squares: tuple, pos=None):
+        if pos is not None:
+            self.food = pos
+        else:
+            self.food = self.spawnFood(squares, snake)
 
     # def draw(self):
     #     pygame.draw.rect(board.dis, (24, 252, 0), [self.food[0], self.food[1], 10, 10])
@@ -174,7 +178,7 @@ class Snake():
 class Game(Server):
     def __init__(self):
         super().__init__()
-        self.establish_two_connections
+        self.establish_two_connections()
         #todo, cant leave this method ^
         self.score = 0
         self.squares = []
@@ -195,16 +199,18 @@ class Game(Server):
         xPosistion = 200
         yPosistion = 150
         clock = pygame.time.Clock()
-        snake = Snake(xPosistion, yPosistion, board)
-        food = Food(snake.snake, self.squares)
-        # s = pygame.font.SysFont("comicsansms",25)
+        snake = Snake(self.snake.snake[0][0], self.snake.snake[0][1])
+        food = Food(snake.snake, self.squares, pos=self.food.food)
+        s = pygame.font.SysFont("comicsansms",25)
         while time.time() < self.start_time:
             continue
         listener = threading.Thread(target=self.listen)
         listener.start()
         while not game_over:
-            print(self.most_recent_message)
-            for event in pygame.event.get():  # replace events with periodic checks of incoming messages, needs to be on another thread
+            event = self.most_recent_message
+            print(event)
+            if event is not None:
+                event = event["EVENT"]
                 if event.type == pygame.QUIT:
                     game_over = True
                 if event.type == pygame.KEYDOWN:
@@ -221,6 +227,7 @@ class Game(Server):
                         x_change = 0
                         y_change = 10
 
+            print("here")
             if xPosistion > width - 10 or xPosistion < 0 or yPosistion >= height or yPosistion < 0:
                 self.end_game()
             elif xPosistion == food.food[0] and yPosistion == food.food[1]:
@@ -233,18 +240,11 @@ class Game(Server):
             xPosistion += x_change
             yPosistion += y_change
 
-            # board.dis.fill((0, 0, 0))
-            # food.draw()
-            # snake.draw(xPosistion, yPosistion)
-            # v = s.render(str(self.score), True, white)
-            # board.dis.blit(v, [0, 0])
-
             response = {"SNAKEPOS": snake.snake,
                         "FOODPOS": food.food,
                         "SCORE": self.score,
                         "TURN": False}  # todo, figure out turn
 
-            # pygame.display.update()
             print("tick")
 
             clock.tick(15)
