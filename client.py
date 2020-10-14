@@ -34,7 +34,6 @@ white = (255, 255, 255)
 global board
 
 
-
 class Client:
     def __init__(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -115,6 +114,8 @@ class Client:
             else:
                 continue
         self.socket.sendall(self.send_json({"PLACEHOLDER": True}))
+
+
 class Board():
     def __init__(self, width, height):
         self.dis = pygame.display.set_mode((width, height))
@@ -200,37 +201,41 @@ class Game(Client):
         snake.draw(snake.snake[0][0], snake.snake[0][1])
         pygame.display.update()
         s = pygame.font.SysFont("comicsansms", 25)
+        test_message = "UP"  # todo, this will cause client and server to immediately be out of sync
         print("about to wait")
         while time.time() < float(self.start_time):
             continue
         while not game_over:
             for event in pygame.event.get():
-                print(event)
-                self.socket.sendall(self.send_json({"EVENT":str(event)}))
                 if event.type == pygame.QUIT:
                     game_over = True
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_LEFT:
                         x_change = -10
                         y_change = 0
+                        test_message = "LEFT"
                     elif event.key == pygame.K_RIGHT:
                         x_change = 10
                         y_change = 0
+                        test_message = "RIGHT"
                     elif event.key == pygame.K_UP:
                         x_change = 0
                         y_change = -10
+                        test_message = "UP"
                     elif event.key == pygame.K_DOWN:
                         x_change = 0
                         y_change = 10
-            print(xPosistion, yPosistion)
-            if xPosistion > self.width - 10 or xPosistion < 0 or yPosistion >= self.height or yPosistion < 0:
+                        test_message = "DOWN"
+            # ask for validation
+            self.socket.sendall(self.send_json({"EVENT": test_message}))
+            response = self.wait_for_message(self.socket)
+            # should timeout around the next tick, perhaps count on another thread
+
+            if response[0] == "QUIT":
                 self.game_over()
-            elif xPosistion == food.food[0] and yPosistion == food.food[1]:
-                snake.eat(food.food[0], food.food[1])
-                self.score += 1
-                food = Food(snake.snake, self.squares)
-            elif snake.isCollision(x_change, y_change):
-                self.game_over()
+            elif response[0] == "EAT" or response == "CONTINUE": #"VALID", "INVALID instead?
+                # new snake and food
+                pass
 
             xPosistion += x_change
             yPosistion += y_change

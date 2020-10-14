@@ -201,46 +201,49 @@ class Game(Server):
         clock = pygame.time.Clock()
         snake = Snake(self.snake.snake[0][0], self.snake.snake[0][1])
         food = Food(snake.snake, self.squares, pos=self.food.food)
-        s = pygame.font.SysFont("comicsansms",25)
+        # s = pygame.font.SysFont("comicsansms",25)
         while time.time() < self.start_time:
             continue
         listener = threading.Thread(target=self.listen)
         listener.start()
         while not game_over:
             event = self.most_recent_message
-            print(event)
             if event is not None:
-                event = event["EVENT"]
-                if event.type == pygame.QUIT:
-                    game_over = True
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_LEFT:
-                        x_change = -10
-                        y_change = 0
-                    elif event.key == pygame.K_RIGHT:
-                        x_change = 10
-                        y_change = 0
-                    elif event.key == pygame.K_UP:
-                        x_change = 0
-                        y_change = -10
-                    elif event.key == pygame.K_DOWN:
-                        x_change = 0
-                        y_change = 10
+                print(event[0])
+                # if event.type == pygame.QUIT:
+                #     game_over = True
+                # if event.type == pygame.KEYDOWN:
+                if event == "LEFT":
+                    x_change = -10
+                    y_change = 0
+                elif event == "RIGHT":
+                    x_change = 10
+                    y_change = 0
+                elif event == "UP":
+                    x_change = 0
+                    y_change = -10
+                elif event == "DOWN":
+                    x_change = 0
+                    y_change = 10
+            instruction = None
 
-            print("here")
             if xPosistion > width - 10 or xPosistion < 0 or yPosistion >= height or yPosistion < 0:
                 self.end_game()
+                instruction = "QUIT"
             elif xPosistion == food.food[0] and yPosistion == food.food[1]:
                 snake.eat(food.food[0], food.food[1])
                 self.score += 1
                 food = Food(snake.snake, self.squares)
+                instruction = "CONTINUE"
             elif snake.isCollision(x_change, y_change):
+                instruction = "QUIT"
                 self.end_game()
 
             xPosistion += x_change
             yPosistion += y_change
 
-            response = {"SNAKEPOS": snake.snake,
+            response = {"INSTRUCTION": instruction, # CONTINUE, EAT, QUIT
+                        "SNAKEPOS": snake.snake,
                         "FOODPOS": food.food,
                         "SCORE": self.score,
                         "TURN": False}  # todo, figure out turn
