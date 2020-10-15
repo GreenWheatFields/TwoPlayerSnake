@@ -25,7 +25,7 @@ class Server:
         self.most_recent_message = None
         self.player1 = None
         self.incoming_message = None
-
+        self.listener_flag = True
         self.food = None
         self.snake = None
         self.start_time = 0
@@ -39,10 +39,10 @@ class Server:
             return False
 
     def listen(self):
-        while True:
+        while self.listener_flag:
             response = self.conn.recv(1024)
             if len(response) > 0:
-                self.most_recent_message = response.decode()
+                self.most_recent_message = Client.read_json(response)
 
     def establish_two_connections(self):
         response = {"INSTRUCTION": "WAIT",
@@ -209,11 +209,11 @@ class Game(Server):
         while not game_over:
             event = self.most_recent_message
             if event is not None:
-                print(event[0])
-                # if event.type == pygame.QUIT:
-                #     game_over = True
-                # if event.type == pygame.KEYDOWN:
-                if event == "LEFT":
+                event = event["EVENT"]
+                print(event)
+                if event == "QUIT":
+                    game_over = True
+                elif event == "LEFT":
                     x_change = -10
                     y_change = 0
                 elif event == "RIGHT":
@@ -225,19 +225,25 @@ class Game(Server):
                 elif event == "DOWN":
                     x_change = 0
                     y_change = 10
-            instruction = None
 
+            instruction = None
             if xPosistion > width - 10 or xPosistion < 0 or yPosistion >= height or yPosistion < 0:
                 self.end_game()
-                instruction = "QUIT"
-            elif xPosistion == food.food[0] and yPosistion == food.food[1]:
-                snake.eat(food.food[0], food.food[1])
-                self.score += 1
-                food = Food(snake.snake, self.squares)
-                instruction = "CONTINUE"
+                # instruction = "QUIT"
+                print("out of bounds")
+            elif [xPosistion, yPosistion] == food.food:
+                # snake.eat(food.food[0], food.food[1])
+                # self.score += 1
+                # food = Food(snake.snake, self.squares)
+                # instruction = "CONTINUE"
+                print("EATEN")
+
             elif snake.isCollision(x_change, y_change):
-                instruction = "QUIT"
+                # instruction = "QUIT"
+                print("snake collision")
                 self.end_game()
+
+
 
             xPosistion += x_change
             yPosistion += y_change
@@ -248,14 +254,15 @@ class Game(Server):
                         "SCORE": self.score,
                         "TURN": False}  # todo, figure out turn
 
-            print("tick")
 
             clock.tick(15)
         pygame.quit()
         quit()
 
     def end_game(self):
-        print("called")
+        #todo, obviously in need of a better cleanup process
+        self.listener_flag = False
+        print("ending")
         pygame.quit()
         quit()
 

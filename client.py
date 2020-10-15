@@ -59,7 +59,7 @@ class Client:
     def wait_for_message(socket: socket.socket):
         # todo,timeout?
         incoming = None
-        while incoming == None:
+        while incoming is None:
             incoming = socket.recv(1024)
             if len(incoming) > 0:
                 response = Game.read_json(incoming)
@@ -201,7 +201,7 @@ class Game(Client):
         snake.draw(snake.snake[0][0], snake.snake[0][1])
         pygame.display.update()
         s = pygame.font.SysFont("comicsansms", 25)
-        test_message = "UP"  # todo, this will cause client and server to immediately be out of sync
+        test_message = "NONE"
         print("about to wait")
         while time.time() < float(self.start_time):
             continue
@@ -228,14 +228,13 @@ class Game(Client):
                         test_message = "DOWN"
             # ask for validation
             self.socket.sendall(self.send_json({"EVENT": test_message}))
-            response = self.wait_for_message(self.socket)
+            # response = self.wait_for_message(self.socket)
             # should timeout around the next tick, perhaps count on another thread
 
-            if response[0] == "QUIT":
-                self.game_over()
-            elif response[0] == "EAT" or response == "CONTINUE": #"VALID", "INVALID instead?
-                # new snake and food
-                pass
+            # if response[0] == "QUIT":
+            #     self.game_over()
+            # elif response[0] == "EAT" or response == "CONTINUE": #"VALID", "INVALID instead?
+            #     print(response)
 
             xPosistion += x_change
             yPosistion += y_change
