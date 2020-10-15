@@ -201,7 +201,7 @@ class Game(Client):
         snake.draw(snake.snake[0][0], snake.snake[0][1])
         pygame.display.update()
         s = pygame.font.SysFont("comicsansms", 25)
-        test_message = "NONE"
+        message = "NONE"
         print("about to wait")
         while time.time() < float(self.start_time):
             continue
@@ -213,21 +213,21 @@ class Game(Client):
                     if event.key == pygame.K_LEFT:
                         x_change = -10
                         y_change = 0
-                        test_message = "LEFT"
+                        message = "LEFT"
                     elif event.key == pygame.K_RIGHT:
                         x_change = 10
                         y_change = 0
-                        test_message = "RIGHT"
+                        message = "RIGHT"
                     elif event.key == pygame.K_UP:
                         x_change = 0
                         y_change = -10
-                        test_message = "UP"
+                        message = "UP"
                     elif event.key == pygame.K_DOWN:
                         x_change = 0
                         y_change = 10
-                        test_message = "DOWN"
+                        message = "DOWN"
             # ask for validation
-            self.socket.sendall(self.send_json({"EVENT": test_message}))
+            self.socket.sendall(self.send_json({"EVENT": message}))
             # response = self.wait_for_message(self.socket)
             # should timeout around the next tick, perhaps count on another thread
 
