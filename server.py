@@ -227,6 +227,10 @@ class Game(Server):
                     y_change = 10
 
             instruction = None
+            print(xPosistion, yPosistion)
+            print(food.food)
+            print([xPosistion == food.food[0], yPosistion == food.food[1]])
+            # TODO, xPos and yPos or foof.food are offset by 10. not sure which one is incorrerct
             if xPosistion > width - 10 or xPosistion < 0 or yPosistion >= height or yPosistion < 0:
                 self.end_game()
                 # instruction = "QUIT"
