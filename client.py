@@ -6,32 +6,16 @@ import pygame
 import sys
 import threading
 
-# s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# s.connect(('localhost', 8089))
-# usename = str(uuid.uuid4())
-# s.send(usename.encode())
-# pygame.init()
-# while True:
-#     print(pygame.event.get())
-#     # s.send(str(uuid.uuid4()).encode())
-#     # time.sleep(1)
-#
-#
+
 # #todo, small window that shows while attempting to connect. automatically closes when client receives instruction to build window
-#
-#
-# # while True:
-# #     print("here")
-# #     s.send(str(time.time()).encode())
-#     # incoming = s.recv(64)
-#     # if len(incoming) > 0:
-#     #     print(incoming.decode())
-from collections import Counter
+
 
 import pygame
 import random
 
 white = (255, 255, 255)
+red = (255, 0, 0)
+blue = (0, 0, 255)
 global board
 
 
@@ -149,17 +133,15 @@ class Food:
         return random.choice(valid_squares)
 
 
-class Snake():
+class Snake:
     def __init__(self, x: int, y: int, board: Board):
         self.board = board
         pygame.draw.rect(board.dis, white, [x, y, 10, 10])
         self.snake = [[x, y]]
 
-    def draw(self, newX, newY):
-        # self.snake.append([newX, newY])
-        # self.snake.pop(0)
+    def draw(self, color):
         for i in self.snake:
-            pygame.draw.rect(self.board.dis, white, [i[0], i[1], 10, 10])
+            pygame.draw.rect(self.board.dis, color, [i[0], i[1], 10, 10])
 
     def eat(self, x, y):
         self.snake.append([x, y])
@@ -208,7 +190,7 @@ class Game(Client):
         snake = Snake(self.start_snake[0][0], self.start_snake[0][1], board)
         food = Food(snake.snake, self.squares, pos=self.start_food)
         food.draw()
-        snake.draw(snake.snake[0][0], snake.snake[0][1])
+        snake.draw(white)
         pygame.display.update()
         s = pygame.font.SysFont("comicsansms", 25)
         message = "NONE"
@@ -237,7 +219,6 @@ class Game(Client):
                         y_change = 10
                         message = "DOWN"
             self.socket.sendall(self.send_json({"EVENT": message}))
-            # should timeout around the next tick, perhaps count on another thread
             if self.most_recent_message is not None:
                 if self.most_recent_message["INSTRUCTION"] == "CONTINUE":
                     snake.snake = self.most_recent_message["SNAKEPOS"]
@@ -250,8 +231,7 @@ class Game(Client):
 
             board.dis.fill((0, 0, 0))
             food.draw()
-            snake.draw(xPosistion, yPosistion)
-
+            snake.draw(red if self.most_recent_message is not None and self.most_recent_message["TURN"] == True else blue)
             v = s.render(str(self.score), True, white)
             board.dis.blit(v, [0, 0])
 

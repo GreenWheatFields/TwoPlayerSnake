@@ -23,7 +23,7 @@ class Server:
         self.initialized = False
         self.players = {}
         self.most_recent_message = None
-        self.player1 = None
+        self.is_player1_turn = False
         self.incoming_message = None
         self.listener_flag = True
         self.food = None
@@ -70,7 +70,7 @@ class Server:
     def build_window_clientside(self):
         temp = [self.players.keys()]
         random.shuffle(temp)
-        self.player1 = temp[0]
+        # self.is_player1_turn = temp[0]
 
         self.squares = []
         x = ([1, 2], [2, 1])
@@ -90,7 +90,6 @@ class Server:
                     "SNAKE": self.snake.snake,
                     "FOOD": self.food.food
                     }
-        # todo, send snake position
         self.conn.sendall(Client.send_json(response))
         while not self.initialized:
             # wait for both clients to report as built and ready
@@ -208,6 +207,7 @@ class Game(Server):
         listener.start()
         while not game_over:
             event = self.most_recent_message
+
             if event is not None:
                 event = event["EVENT"]
                 print(event)
@@ -240,6 +240,7 @@ class Game(Server):
                 self.score += 1
                 food = Food(snake.snake, self.squares)
                 instruction = "EAT"
+                self.is_player1_turn = not self.is_player1_turn
                 print("EATEN")
             elif snake.isCollision(x_change, y_change):
                 instruction = "QUIT"
@@ -257,9 +258,13 @@ class Game(Server):
                         "SNAKEPOS": snake.snake,
                         "FOODPOS": food.food,
                         "SCORE": self.score,
-                        "TURN": False}  # todo, figure out turn
+                        "TURN": self.is_player1_turn}  # todo, figure out turn
+
             self.conn.sendall(Client.send_json(response))
-            if instruction == "QUIT": self.end_game()
+            if instruction == "QUIT":
+                self.end_game()
+
+
 
             clock.tick(15)
         pygame.quit()
