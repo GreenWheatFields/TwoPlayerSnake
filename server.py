@@ -59,7 +59,7 @@ class Server:
                 response["TIME"] = time.time()
                 self.conn.sendall(Client.send_json(response))
                 break
-                #todo, breaking prematurely for the sake of testing
+                # todo, breaking prematurely for the sake of testing
             else:
                 response["TIME"] = time.time()
                 self.conn.sendall(Client.send_json(response))
@@ -111,7 +111,7 @@ class Server:
         self.sync()
 
     def sync(self):
-        self.start_time = time.time() + 2
+        self.start_time = time.time() + .25
         message = {
             "INSTRUCTION": "PLAY",
             "STARTTIME": str(self.start_time)
@@ -119,7 +119,7 @@ class Server:
         self.conn.sendall(Client.send_json(message))
         while True:
             self.incoming_message = Client.wait_for_message(self.conn)
-            break #assuming a good response
+            break  # assuming a good response
 
 
 class Board():
@@ -179,7 +179,7 @@ class Game(Server):
     def __init__(self):
         super().__init__()
         self.establish_two_connections()
-        #todo, cant leave this method ^
+        # todo, cant leave this method ^
         self.score = 0
         self.squares = []
         x = ([1, 2], [2, 1])
@@ -228,44 +228,43 @@ class Game(Server):
 
             xPosistion += x_change
             yPosistion += y_change
-            #todo. when the client is spamming an input before the snake is free to move, it offsets the server snake x axis by 10
+            # todo. when the client is spamming an input before the snake is free to move, it offsets the server snake x axis by 10
 
             instruction = None
-            print(xPosistion, food.food[0])
             if xPosistion > width - 10 or xPosistion < 0 or yPosistion >= height or yPosistion < 0:
-                self.end_game()
-                # instruction = "QUIT"
+                instruction = "QUIT"
                 print("out of bounds")
             elif [xPosistion, yPosistion] == food.food:
                 snake.eat(food.food[0], food.food[1])
+                print(snake.snake)
                 self.score += 1
                 food = Food(snake.snake, self.squares)
                 instruction = "EAT"
                 print("EATEN")
-
             elif snake.isCollision(x_change, y_change):
-                # instruction = "QUIT"
+                instruction = "QUIT"
                 print("snake collision")
-                self.end_game()
+            else:
+                instruction = "CONTINUE"
+
+            if instruction != "EAT":
+                snake.draw(xPosistion, yPosistion)
 
 
-
-
-
-            response = {"INSTRUCTION": instruction, # CONTINUE, EAT, QUIT
+            response = {"INSTRUCTION": instruction,  # CONTINUE, EAT, QUIT
                         "SNAKEPOS": snake.snake,
                         "FOODPOS": food.food,
                         "SCORE": self.score,
                         "TURN": False}  # todo, figure out turn
             self.conn.sendall(Client.send_json(response))
-
+            if instruction == "QUIT": self.end_game()
 
             clock.tick(15)
         pygame.quit()
         quit()
 
     def end_game(self):
-        #todo, obviously in need of a better cleanup process
+        # todo, obviously in need of a better cleanup process
         self.listener_flag = False
         print("ending")
         pygame.quit()

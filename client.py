@@ -236,15 +236,16 @@ class Game(Client):
                         x_change = 0
                         y_change = 10
                         message = "DOWN"
-            # ask for validation
             self.socket.sendall(self.send_json({"EVENT": message}))
-            print(self.most_recent_message)
             # should timeout around the next tick, perhaps count on another thread
-
-            # if response[0] == "QUIT":
-            #     self.game_over()
-            # elif response[0] == "EAT" or response == "CONTINUE": #"VALID", "INVALID instead?
-            #     print(response)
+            print(self.most_recent_message)
+            if self.most_recent_message is not None:
+                if self.most_recent_message["INSTRUCTION"] == "CONTINUE":
+                    pass
+                elif self.most_recent_message["INSTRUCTION"] == "EAT":
+                    pass
+                snake.snake = self.most_recent_message["SNAKEPOS"]
+                food = Food(0, 0, pos=self.most_recent_message["FOODPOS"])
 
             xPosistion += x_change
             yPosistion += y_change
