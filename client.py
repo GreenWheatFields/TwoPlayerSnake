@@ -4,6 +4,7 @@ import uuid
 import json
 import pygame
 import sys
+import threading
 
 # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # s.connect(('localhost', 8089))
@@ -46,6 +47,8 @@ class Client:
         self.start_snake = None
         self.start_food = None
         self.start_time = None
+        self.listener_flag = True
+        self.most_recent_message = None
 
     @staticmethod
     def send_json(x):
@@ -66,6 +69,11 @@ class Client:
                 return response
             else:
                 incoming = None
+    def listen(self):
+        while self.listener_flag:
+            message = self.socket.recv(1024)
+            if len(message) > 0:
+                self.most_recent_message = self.read_json(message)
 
     def establish_connection(self):
         # self.user_name = uuid.uuid4()
@@ -184,6 +192,8 @@ class Game(Client):
             for j in range(0, self.height, 10):
                 self.squares.append([i, j])
         self.squares = tuple(self.squares)
+        listener = threading.Thread(target=self.listen)
+        listener.start()
         self.start()
 
     def start(self):
@@ -228,7 +238,7 @@ class Game(Client):
                         message = "DOWN"
             # ask for validation
             self.socket.sendall(self.send_json({"EVENT": message}))
-            # response = self.wait_for_message(self.socket)
+            print(self.most_recent_message)
             # should timeout around the next tick, perhaps count on another thread
 
             # if response[0] == "QUIT":

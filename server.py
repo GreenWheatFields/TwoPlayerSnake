@@ -226,20 +226,21 @@ class Game(Server):
                     x_change = 0
                     y_change = 10
 
+            xPosistion += x_change
+            yPosistion += y_change
+            #todo. when the client is spamming an input before the snake is free to move, it offsets the server snake x axis by 10
+
             instruction = None
-            print(xPosistion, yPosistion)
-            print(food.food)
-            print([xPosistion == food.food[0], yPosistion == food.food[1]])
-            # TODO, xPos and yPos or foof.food are offset by 10. not sure which one is incorrerct
+            print(xPosistion, food.food[0])
             if xPosistion > width - 10 or xPosistion < 0 or yPosistion >= height or yPosistion < 0:
                 self.end_game()
                 # instruction = "QUIT"
                 print("out of bounds")
             elif [xPosistion, yPosistion] == food.food:
-                # snake.eat(food.food[0], food.food[1])
-                # self.score += 1
-                # food = Food(snake.snake, self.squares)
-                # instruction = "CONTINUE"
+                snake.eat(food.food[0], food.food[1])
+                self.score += 1
+                food = Food(snake.snake, self.squares)
+                instruction = "EAT"
                 print("EATEN")
 
             elif snake.isCollision(x_change, y_change):
@@ -249,14 +250,14 @@ class Game(Server):
 
 
 
-            xPosistion += x_change
-            yPosistion += y_change
+
 
             response = {"INSTRUCTION": instruction, # CONTINUE, EAT, QUIT
                         "SNAKEPOS": snake.snake,
                         "FOODPOS": food.food,
                         "SCORE": self.score,
                         "TURN": False}  # todo, figure out turn
+            self.conn.sendall(Client.send_json(response))
 
 
             clock.tick(15)
