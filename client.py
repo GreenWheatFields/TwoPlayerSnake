@@ -156,8 +156,8 @@ class Snake():
         self.snake = [[x, y]]
 
     def draw(self, newX, newY):
-        self.snake.append([newX, newY])
-        self.snake.pop(0)
+        # self.snake.append([newX, newY])
+        # self.snake.pop(0)
         for i in self.snake:
             pygame.draw.rect(self.board.dis, white, [i[0], i[1], 10, 10])
 
@@ -238,14 +238,12 @@ class Game(Client):
                         message = "DOWN"
             self.socket.sendall(self.send_json({"EVENT": message}))
             # should timeout around the next tick, perhaps count on another thread
-            print(self.most_recent_message)
             if self.most_recent_message is not None:
                 if self.most_recent_message["INSTRUCTION"] == "CONTINUE":
-                    pass
-                elif self.most_recent_message["INSTRUCTION"] == "EAT":
-                    pass
-                snake.snake = self.most_recent_message["SNAKEPOS"]
-                food = Food(0, 0, pos=self.most_recent_message["FOODPOS"])
+                    snake.snake = self.most_recent_message["SNAKEPOS"]
+                    food = Food(None, None, pos=self.most_recent_message["FOODPOS"])
+                elif self.most_recent_message["INSTRUCTION"] == "QUIT":
+                    break
 
             xPosistion += x_change
             yPosistion += y_change

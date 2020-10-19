@@ -247,11 +247,13 @@ class Game(Server):
             else:
                 instruction = "CONTINUE"
 
-            if instruction != "EAT":
+            if instruction == "EAT":
+                instruction = "CONTINUE"
+            else:
                 snake.draw(xPosistion, yPosistion)
 
 
-            response = {"INSTRUCTION": instruction,  # CONTINUE, EAT, QUIT
+            response = {"INSTRUCTION": instruction,  # CONTINUE, QUIT
                         "SNAKEPOS": snake.snake,
                         "FOODPOS": food.food,
                         "SCORE": self.score,
