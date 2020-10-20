@@ -61,7 +61,7 @@ class Client:
 
     def establish_connection(self):
         # self.user_name = uuid.uuid4()
-        self.socket.connect(('35.223.147.55', 8089))
+        self.socket.connect(('35.206.126.121', 8089))
 
     def init_game(self):
         response = {"userName": str(uuid.uuid4()),
