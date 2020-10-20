@@ -16,7 +16,7 @@ class Server:
 
     def __init__(self):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_socket.bind(('0.0.0.0', 3000))
+        self.server_socket.bind(('0.0.0.0', 13500))
         self.server_socket.listen(2)
         self.conn, self.address = self.server_socket.accept()
         print("here")
