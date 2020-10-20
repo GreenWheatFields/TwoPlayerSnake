@@ -16,7 +16,7 @@ class Server:
 
     def __init__(self):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_socket.bind(('localhost', 8089))
+        self.server_socket.bind(('35.223.147.55', 8089))
         self.server_socket.listen(2)
         self.conn, self.address = self.server_socket.accept()  # todo when testing with multiple ips, does this variable change?
         self.game_over = False
