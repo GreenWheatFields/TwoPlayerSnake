@@ -124,9 +124,7 @@ class Server:
 
 class Board():
     def __init__(self):
-        self.dis = pygame.display.set_mode((width, height))
-        pygame.display.set_caption("2PSnake")
-
+        pass
 
 class Food:
     def __init__(self, snake, squares: tuple, pos=None):
