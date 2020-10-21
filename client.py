@@ -6,7 +6,6 @@ import pygame
 import sys
 import threading
 
-
 # #todo, small window that shows while attempting to connect. automatically closes when client receives instruction to build window
 
 
@@ -40,7 +39,10 @@ class Client:
 
     @staticmethod
     def read_json(x):
+        # try:
+
         return json.loads(x.decode())
+        # except json.
 
     @staticmethod
     def wait_for_message(socket: socket.socket):
@@ -53,6 +55,7 @@ class Client:
                 return response
             else:
                 incoming = None
+
     def listen(self):
         while self.listener_flag:
             message = self.socket.recv(1024)
@@ -106,7 +109,6 @@ class Client:
             else:
                 continue
         self.socket.sendall(self.send_json({"PLACEHOLDER": True}))
-
 
 class Board():
     def __init__(self, width, height):
@@ -174,7 +176,7 @@ class Game(Client):
             for j in range(0, self.height, 10):
                 self.squares.append([i, j])
         self.squares = tuple(self.squares)
-        listener = threading.Thread(target=self.listen)
+        listener = threading.Thread(target=self.listen, name="ClientListener")
         listener.start()
         self.start()
 
@@ -195,7 +197,7 @@ class Game(Client):
         pygame.display.update()
         s = pygame.font.SysFont("comicsansms", 25)
         message = "NONE"
-        print("about to wait")
+        print("about to wait")  # todo, somewhere before this is a json decode error
         while time.time() < float(self.start_time):
             continue
         while not game_over:
@@ -224,7 +226,9 @@ class Game(Client):
                 if self.most_recent_message["INSTRUCTION"] == "CONTINUE":
                     snake.snake = self.most_recent_message["SNAKEPOS"]
                     food = Food(None, None, pos=self.most_recent_message["FOODPOS"])
+                    self.score = self.most_recent_message["SCORE"]
                     ping = time.time() - self.most_recent_message["TIME"]
+                    print(ping)
                 elif self.most_recent_message["INSTRUCTION"] == "QUIT":
                     break
 

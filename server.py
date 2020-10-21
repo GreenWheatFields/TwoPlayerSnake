@@ -271,7 +271,7 @@ class Game(Server):
         quit()
 
     def end_game(self):
-        # todo, obviously in need of a better cleanup process
+        self.server_socket.close()
         self.listener_flag = False
         print("ending")
         pygame.quit()
