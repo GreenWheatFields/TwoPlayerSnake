@@ -257,8 +257,9 @@ class Game(Server):
                         "SNAKEPOS": snake.snake,
                         "FOODPOS": food.food,
                         "SCORE": self.score,
-                        "TURN": self.is_player1_turn}  # todo, figure out turn
-
+                        "TURN": self.is_player1_turn, # todo, figure out turn
+                        "TIME": time.time()
+                        }
             self.conn.sendall(Client.send_json(response))
             if instruction == "QUIT":
                 self.end_game()

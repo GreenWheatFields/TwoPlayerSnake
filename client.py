@@ -189,6 +189,7 @@ class Game(Client):
         clock = pygame.time.Clock()
         snake = Snake(self.start_snake[0][0], self.start_snake[0][1], board)
         food = Food(snake.snake, self.squares, pos=self.start_food)
+        ping = 0
         food.draw()
         snake.draw(white)
         pygame.display.update()
@@ -223,6 +224,7 @@ class Game(Client):
                 if self.most_recent_message["INSTRUCTION"] == "CONTINUE":
                     snake.snake = self.most_recent_message["SNAKEPOS"]
                     food = Food(None, None, pos=self.most_recent_message["FOODPOS"])
+                    ping = time.time() - self.most_recent_message["TIME"]
                 elif self.most_recent_message["INSTRUCTION"] == "QUIT":
                     break
 
