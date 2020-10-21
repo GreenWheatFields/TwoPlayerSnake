@@ -176,7 +176,7 @@ class Game(Client):
             for j in range(0, self.height, 10):
                 self.squares.append([i, j])
         self.squares = tuple(self.squares)
-        listener = threading.Thread(target=self.listen, name="ClientListener")
+        listener = threading.Thread(target=self.listen, name="ClientListener") # todo, somewhere in this thread is a json.decode.decode error. only here
         listener.start()
         self.start()
 
@@ -197,7 +197,7 @@ class Game(Client):
         pygame.display.update()
         s = pygame.font.SysFont("comicsansms", 25)
         message = "NONE"
-        print("about to wait")  # todo, somewhere before this is a json decode error
+        print("about to wait")
         while time.time() < float(self.start_time):
             continue
         while not game_over:
