@@ -19,7 +19,6 @@ class Server:
         self.server_socket.bind(('0.0.0.0', 13500))
         self.server_socket.listen(2)
         self.conn, self.address = self.server_socket.accept()
-        print("here")
         self.game_over = False
         self.initialized = False
         self.players = {}

@@ -60,11 +60,19 @@ class Client:
         while self.listener_flag:
             message = self.socket.recv(1024)
             if len(message) > 0:
-                self.most_recent_message = self.read_json(message)
+                try:
+                    self.most_recent_message = self.read_json(message)
+                except ValueError as v:
+                    # todo, the error message is two messages being sent as one
+                    print(message)
+                    print("fatal error")
+                    self.listener_flag = False # todo, no way to end main game from listener thread
+                    print(v)
+                    sys.exit()
 
     def establish_connection(self):
         # self.user_name = uuid.uuid4()
-        self.socket.connect(('34.224.30.47', 13500))
+        self.socket.connect(('3.95.9.212', 13500))
 
     def init_game(self):
         response = {"userName": str(uuid.uuid4()),
@@ -109,6 +117,7 @@ class Client:
             else:
                 continue
         self.socket.sendall(self.send_json({"PLACEHOLDER": True}))
+
 
 class Board():
     def __init__(self, width, height):
@@ -176,7 +185,7 @@ class Game(Client):
             for j in range(0, self.height, 10):
                 self.squares.append([i, j])
         self.squares = tuple(self.squares)
-        listener = threading.Thread(target=self.listen, name="ClientListener") # todo, somewhere in this thread is a json.decode.decode error. only here
+        listener = threading.Thread(target=self.listen, name="ClientListener")  # todo, somewhere in this thread is a json.decode.decode error. only here
         listener.start()
         self.start()
 
@@ -229,6 +238,7 @@ class Game(Client):
                     self.score = self.most_recent_message["SCORE"]
                     ping = time.time() - self.most_recent_message["TIME"]
                     print(ping)
+                    if(ping > 2): self.game_over()
                 elif self.most_recent_message["INSTRUCTION"] == "QUIT":
                     break
 
