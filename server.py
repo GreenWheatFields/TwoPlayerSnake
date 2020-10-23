@@ -183,7 +183,7 @@ class Snake():
 
 class Game(Server):
     def __init__(self):
-        super().__init__()
+        super().__init__(twoPlayers=True)
         self.establish_two_connections()
         # todo, cant leave this method ^
         self.score = 0
