@@ -67,8 +67,8 @@ class Client:
                             next_message = index
                             break
 
-                    message = message.decode()[:next_message]
-                    print(json.loads(message))
+                    message = message.decode()[:next_message + 1]
+                    print(message)
                     print("fatal error")
                     self.listener_flag = False # todo, no way to end main game from listener thread
                     sys.exit(1)
@@ -244,6 +244,7 @@ class Game(Client):
                     if (ping > 2): self.game_over()
                 elif self.most_recent_message["INSTRUCTION"] == "QUIT":
                     break
+            print(self.most_recent_message)
 
             xPosistion += x_change
             yPosistion += y_change

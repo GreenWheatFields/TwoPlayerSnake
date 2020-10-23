@@ -43,8 +43,9 @@ class Server:
         while self.listener_flag:
             response = self.conn.recv(1024)
             if len(response) > 0:
+                print(response, "HERE")
                 self.most_recent_message = Client.read_json(response)
-                print(self.most_recent_message["INSTRUCTION"])
+
 
     def establish_two_connections(self):
         response = {"INSTRUCTION": "WAIT",
@@ -261,7 +262,8 @@ class Game(Server):
                         "TURN": self.is_player1_turn,  # todo, figure out turn
                         "TIME": time.time()
                         }
-            self.ticks[response["TIME"]] = response
+            # self.ticks[response["TIME"]] = response
+            print(response)
             self.conn.sendall(Client.send_json(response))
             if instruction == "QUIT":
                 self.end_game()
