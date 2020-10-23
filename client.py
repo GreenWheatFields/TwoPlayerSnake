@@ -62,17 +62,16 @@ class Client:
                 except ValueError as v:
                     next_message = 0
                     print(self.most_recent_message)  # server is skipping three ticks in front of client at times, usually when ping hits .7
-                    print(message.decode())
                     for index, char in enumerate(message.decode()):
                         if char == "}":  # todo, tell server to resynchronize at this tick/time? server will need to keep a rolling list past ticks
                             next_message = index
-                            print("hit")
+                            break
 
                     message = message.decode()[:next_message]
-                    print(message)
-                    self.most_recent_message = json.loads(message)
+                    print(json.loads(message))
                     print("fatal error")
-                    # self.listener_flag = False # todo, no way to end main game from listener thread
+                    self.listener_flag = False # todo, no way to end main game from listener thread
+                    sys.exit(1)
 
     def establish_connection(self):
         # self.user_name = uuid.uuid4()

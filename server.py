@@ -26,6 +26,7 @@ class Server:
         self.is_player1_turn = False
         self.incoming_message = None
         self.listener_flag = True
+        self.ticks = {}
         self.food = None
         self.snake = None
         self.start_time = 0
@@ -43,6 +44,7 @@ class Server:
             response = self.conn.recv(1024)
             if len(response) > 0:
                 self.most_recent_message = Client.read_json(response)
+                print(self.most_recent_message["INSTRUCTION"])
 
     def establish_two_connections(self):
         response = {"INSTRUCTION": "WAIT",
@@ -124,6 +126,7 @@ class Server:
 class Board():
     def __init__(self):
         pass
+
 
 class Food:
     def __init__(self, snake, squares: tuple, pos=None):
@@ -251,19 +254,17 @@ class Game(Server):
             else:
                 snake.draw(xPosistion, yPosistion)
 
-
             response = {"INSTRUCTION": instruction,  # CONTINUE, QUIT
                         "SNAKEPOS": snake.snake,
                         "FOODPOS": food.food,
                         "SCORE": self.score,
-                        "TURN": self.is_player1_turn, # todo, figure out turn
+                        "TURN": self.is_player1_turn,  # todo, figure out turn
                         "TIME": time.time()
                         }
+            self.ticks[response["TIME"]] = response
             self.conn.sendall(Client.send_json(response))
             if instruction == "QUIT":
                 self.end_game()
-
-
 
             clock.tick(15)
         pygame.quit()
