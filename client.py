@@ -39,10 +39,7 @@ class Client:
 
     @staticmethod
     def read_json(x):
-        # try:
-
         return json.loads(x.decode())
-        # except json.
 
     @staticmethod
     def wait_for_message(socket: socket.socket):
@@ -63,16 +60,23 @@ class Client:
                 try:
                     self.most_recent_message = self.read_json(message)
                 except ValueError as v:
-                    # todo, the error message is two messages being sent as one
+                    next_message = 0
+                    print(self.most_recent_message)  # server is skipping three ticks in front of client at times, usually when ping hits .7
+                    print(message.decode())
+                    for index, char in enumerate(message.decode()):
+                        if char == "}":  # todo, tell server to resynchronize at this tick/time? server will need to keep a rolling list past ticks
+                            next_message = index
+                            print("hit")
+
+                    message = message.decode()[:next_message]
                     print(message)
+                    self.most_recent_message = json.loads(message)
                     print("fatal error")
-                    self.listener_flag = False # todo, no way to end main game from listener thread
-                    print(v)
-                    sys.exit()
+                    # self.listener_flag = False # todo, no way to end main game from listener thread
 
     def establish_connection(self):
         # self.user_name = uuid.uuid4()
-        self.socket.connect(('3.95.9.212', 13500))
+        self.socket.connect(('54.242.88.162', 13500))
 
     def init_game(self):
         response = {"userName": str(uuid.uuid4()),
@@ -238,7 +242,7 @@ class Game(Client):
                     self.score = self.most_recent_message["SCORE"]
                     ping = time.time() - self.most_recent_message["TIME"]
                     print(ping)
-                    if(ping > 2): self.game_over()
+                    if (ping > 2): self.game_over()
                 elif self.most_recent_message["INSTRUCTION"] == "QUIT":
                     break
 
