@@ -14,7 +14,7 @@ white = (255, 255, 255)
 
 class Server:
 
-    def __init__(self):
+    def __init__(self, twoPlayers=False):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.bind(('0.0.0.0', 13500))
         self.server_socket.listen(2)
@@ -22,6 +22,7 @@ class Server:
         self.game_over = False
         self.initialized = False
         self.players = {}
+        self.twoPlayers = twoPlayers
         self.most_recent_message = None
         self.is_player1_turn = False
         self.incoming_message = None
@@ -43,7 +44,6 @@ class Server:
         while self.listener_flag:
             response = self.conn.recv(1024)
             if len(response) > 0:
-                print(response, "HERE")
                 self.most_recent_message = Client.read_json(response)
 
 
@@ -51,17 +51,22 @@ class Server:
         response = {"INSTRUCTION": "WAIT",
                     "WIDTH": width,
                     "HEIGHT": height,
-                    "WAITING": True}  # todo, sent start position of snake
+                    "WAITING": True}
 
         while len(self.players) < 2:
             incoming = Client.wait_for_message(self.conn)
-            temp = incoming["userName"] not in self.players  # todo, catch typeerror here
+            temp = incoming["userName"] not in self.players
             if temp:
                 self.players[incoming["userName"]] = self.address[0]
                 response["WAITING"] = False if len(self.players) >= 2 else True
                 response["TIME"] = time.time()
+
                 self.conn.sendall(Client.send_json(response))
-                break
+                if not self.twoPlayers:
+                    break
+                else:
+                    pass
+
                 # todo, breaking prematurely for the sake of testing
             else:
                 response["TIME"] = time.time()

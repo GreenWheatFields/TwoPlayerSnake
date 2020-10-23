@@ -69,6 +69,7 @@ class Client:
 
                     message = message.decode()[:next_message + 1]
                     print(message)
+                    # cant recreate on low ping
                     print("fatal error")
                     self.listener_flag = False # todo, no way to end main game from listener thread
                     sys.exit(1)
