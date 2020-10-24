@@ -207,28 +207,38 @@ class Game(Server):
             event = self.most_recent_message
             if event is not None:
                 if event.get("SYNC"):
-                    for i in self.ticks.keys():
-                        print(i, self.ticks[i])
-                    print(event)
-                    self.end_game()
-                event = event["EVENT"]
-                if event == "QUIT":
-                    game_over = True
-                elif event == "LEFT":
-                    x_change = -10
-                    y_change = 0
-                elif event == "RIGHT":
-                    x_change = 10
-                    y_change = 0
-                elif event == "UP":
-                    x_change = 0
-                    y_change = -10
-                elif event == "DOWN":
-                    x_change = 0
-                    y_change = 10
+                    sync_from = self.ticks[event["TIME"]]
+                    snake.snake = sync_from["SNAKPOS"]
+                    food.food = sync_from["FOODPOS"]
+                    self.score = sync_from["SCORE"]
+                    xPosistion = snake.snake[len(snake.snake)][0]
+                    yPosistion = snake.snake[len(snake.snake)][1]
+                    flag = False
+                    for i in self.ticks:
+                        if flag:
+                            del self.ticks[i]
+                        if i == sync_from["TIME"]:
+                            flag = True
 
-            xPosistion += x_change
-            yPosistion += y_change
+                else:
+                    event = event["EVENT"]
+                    if event == "QUIT":
+                        game_over = True
+                    elif event == "LEFT":
+                        x_change = -10
+                        y_change = 0
+                    elif event == "RIGHT":
+                        x_change = 10
+                        y_change = 0
+                    elif event == "UP":
+                        x_change = 0
+                        y_change = -10
+                    elif event == "DOWN":
+                        x_change = 0
+                        y_change = 10
+
+                    xPosistion += x_change
+                    yPosistion += y_change
             # todo. when the client is spamming an input before the snake is free to move, it offsets the server snake x axis by 10
 
             instruction = None
@@ -268,6 +278,7 @@ class Game(Server):
             clock.tick(15)
         pygame.quit()
         quit()
+
 
     def end_game(self):
         self.server_socket.close()
