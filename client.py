@@ -69,10 +69,11 @@ class Client:
 
                     message = message.decode()[:next_message + 1]
                     print(message)
+                    message = json.loads(message)
+                    self.socket.sendall(self.send_json({"SYNC": message["TIME"]}))
+                    # pause main game loop and wait to syncronize?
                     # cant recreate on low ping
                     print("fatal error")
-                    self.listener_flag = False # todo, no way to end main game from listener thread
-                    sys.exit(1)
 
     def establish_connection(self):
         # self.user_name = uuid.uuid4()
