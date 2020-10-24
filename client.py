@@ -245,7 +245,6 @@ class Game(Client):
                     if (ping > 2): self.game_over()
                 elif self.most_recent_message["INSTRUCTION"] == "QUIT":
                     break
-            print(self.most_recent_message)
 
             xPosistion += x_change
             yPosistion += y_change

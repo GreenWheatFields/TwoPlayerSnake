@@ -223,7 +223,6 @@ class Game(Server):
 
             if event is not None:
                 event = event["EVENT"]
-                print(event)
                 if event == "QUIT":
                     game_over = True
                 elif event == "LEFT":
