@@ -61,7 +61,7 @@ class Client:
                     self.most_recent_message = self.read_json(message)
                 except ValueError as v:
                     next_message = 0
-                    print(self.most_recent_message)  # server is skipping three ticks in front of client at times, usually when ping hits .7
+                    print(message.decode())  # server is skipping three ticks in front of client at times, usually when ping hits .7
                     for index, char in enumerate(message.decode()):
                         if char == "}":  # todo, tell server to resynchronize at this tick/time? server will need to keep a rolling list past ticks
                             next_message = index

@@ -135,21 +135,12 @@ class Server:
 
 
 
-class Board():
-    def __init__(self):
-        pass
-
-
 class Food:
     def __init__(self, snake, squares: tuple, pos=None):
         if pos is not None:
             self.food = pos
         else:
             self.food = self.spawnFood(squares, snake)
-
-    # def draw(self):
-    #     pygame.draw.rect(board.dis, (24, 252, 0), [self.food[0], self.food[1], 10, 10])
-
     def spawnFood(self, squares, snake):
         valid_squares = list(squares)
         for j in snake:
@@ -161,15 +152,11 @@ class Food:
 
 class Snake():
     def __init__(self, x: int, y: int):
-        # self.board = board
-        # pygame.draw.rect(board.dis, white, [x, y, 10, 10])
         self.snake = [[x, y]]
 
     def draw(self, newX, newY):
         self.snake.append([newX, newY])
         self.snake.pop(0)
-        # for i in self.snake:
-        #     pygame.draw.rect(self.board.dis, white, [i[0], i[1], 10, 10])
 
     def eat(self, x, y):
         self.snake.append([x, y])
@@ -203,8 +190,6 @@ class Game(Server):
 
     def start(self):
         pygame.init()
-        global board
-        board = Board()
         game_over = False
         x_change = y_change = 0
 
@@ -248,7 +233,6 @@ class Game(Server):
                 print("out of bounds")
             elif [xPosistion, yPosistion] == food.food:
                 snake.eat(food.food[0], food.food[1])
-                print(snake.snake)
                 self.score += 1
                 food = Food(snake.snake, self.squares)
                 instruction = "EAT"
@@ -272,8 +256,7 @@ class Game(Server):
                         "TURN": self.is_player1_turn,  # todo, figure out turn
                         "TIME": time.time()
                         }
-            # self.ticks[response["TIME"]] = response
-            print(response)
+            self.ticks[response["TIME"]] = response
             self.conn.sendall(Client.send_json(response))
             if instruction == "QUIT":
                 self.end_game()
@@ -293,5 +276,4 @@ class Game(Server):
 if __name__ == '__main__':
     game = Game()
     game.start()
-    # while not game.initialized:
-    #     pass
+
