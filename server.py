@@ -208,7 +208,7 @@ class Game(Server):
             if event is not None:
                 if event.get("SYNC"):
                     sync_from = self.ticks[event["SYNC"]]
-                    snake.snake = sync_from["SNAKPOS"]
+                    snake.snake = sync_from["SNAKEPOS"]
                     food.food = sync_from["FOODPOS"]
                     self.score = sync_from["SCORE"]
                     xPosistion = snake.snake[len(snake.snake)][0]
