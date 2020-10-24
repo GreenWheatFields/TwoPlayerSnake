@@ -211,8 +211,8 @@ class Game(Server):
                     snake.snake = sync_from["SNAKEPOS"]
                     food.food = sync_from["FOODPOS"]
                     self.score = sync_from["SCORE"]
-                    xPosistion = snake.snake[len(snake.snake)][0]
-                    yPosistion = snake.snake[len(snake.snake)][1]
+                    xPosistion = snake.snake[len(snake.snake)- 1][0]
+                    yPosistion = snake.snake[len(snake.snake) - 1][1]
                     flag = False
                     for i in self.ticks:
                         if flag:
