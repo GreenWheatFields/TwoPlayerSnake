@@ -208,8 +208,7 @@ class Game(Server):
 
             if event is not None:
                 if event.get("SYNC"):
-                    print("sync message reciveed")
-                    print(self.ticks)
+                    print(i for [i] in self.ticks)
                     print(event)
                 event = event["EVENT"]
                 if event == "QUIT":
