@@ -46,7 +46,6 @@ class Server:
             if len(response) > 0:
                 self.most_recent_message = Client.read_json(response)
 
-
     def establish_two_connections(self):
         response = {"INSTRUCTION": "WAIT",
                     "WIDTH": width,
@@ -70,6 +69,7 @@ class Server:
                 # todo, breaking prematurely for the sake of testing
             else:
                 response["TIME"] = time.time()
+                # this function can be cleaner.
                 self.conn.sendall(Client.send_json(response))
 
         print("ESTABLISHED TWO CONNS")
@@ -107,12 +107,13 @@ class Server:
                 try:
                     if self.incoming_message["READY"]:
                         print("READY MESSAGE")
-                        self.initialized = True
-                        break
-                        # if self.incoming_message["USERNAME"] not in players_ready:
-                        #     players_ready[self.incoming_message["USERNAME"]] = True
-                        # else:
-                        #     pass
+                        if not self.twoPlayers:
+                            self.initialized = True
+                            break
+                        else:
+                            if self.incoming_message["USERNAME"] not in players_ready:
+                                players_ready[self.incoming_message["USERNAME"]] = True
+
                 except KeyError:
                     pass
         self.sync()
@@ -124,9 +125,14 @@ class Server:
             "STARTTIME": str(self.start_time)
         }
         self.conn.sendall(Client.send_json(message))
-        while True:
+        players_ready = []
+        while len(players_ready) < 2 or time.time() < self.start_time:
             self.incoming_message = Client.wait_for_message(self.conn)
-            break  # assuming a good response
+            if not self.twoPlayers:
+                break
+            elif self.address not in players_ready:
+                players_ready.append(self.address)
+
 
 
 class Board():
