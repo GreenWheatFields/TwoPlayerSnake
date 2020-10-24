@@ -207,7 +207,7 @@ class Game(Server):
             event = self.most_recent_message
             if event is not None:
                 if event.get("SYNC"):
-                    sync_from = self.ticks[event["TIME"]]
+                    sync_from = self.ticks[event["SYNC"]]
                     snake.snake = sync_from["SNAKPOS"]
                     food.food = sync_from["FOODPOS"]
                     self.score = sync_from["SCORE"]
