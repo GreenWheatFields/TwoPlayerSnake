@@ -205,11 +205,12 @@ class Game(Server):
         listener.start()
         while not game_over:
             event = self.most_recent_message
-
             if event is not None:
                 if event.get("SYNC"):
-                    print(i for [i] in self.ticks)
+                    for i in self.ticks:
+                        print(i)
                     print(event)
+                    self.end_game()
                 event = event["EVENT"]
                 if event == "QUIT":
                     game_over = True
