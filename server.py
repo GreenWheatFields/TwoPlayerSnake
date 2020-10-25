@@ -220,7 +220,7 @@ class Game(Server):
                             del self.ticks[i]
                         if i == sync_from["TIME"]:
                             flag = True
-                    self.server_socket.sendall(Client.send_json({"INSTRUCTION": "SYNCED"}))
+                    self.conn.sendall(Client.send_json({"INSTRUCTION": "SYNCED"}))
 
                 else:
                     event = event["EVENT"]
