@@ -61,25 +61,13 @@ class Client:
                 try:
                     self.most_recent_message = self.read_json(message)
                 except ValueError as v:
-                    next_message = 0
-                    print(message.decode())  # server is skipping three ticks in front of client at times, usually when ping hits .7
-                    for index, char in enumerate(message.decode()):
-                        if char == "}":  # todo, tell server to resynchronize at this tick/time? server will need to keep a rolling list past ticks
-                            next_message = index
-                            break
-
-                    message = message.decode()[:next_message + 1]
-                    print(message)
-                    message = json.loads(message)
-                    self.socket.sendall(self.send_json({"SYNC": message["TIME"]}))
-                    self.syncing = True
-                    response = Client.wait_for_message(self.socket)
-                    if response["INSTRUCTION"] == "SYNCED":
-                        print("SYNED")
-                    self.syncing = False
-                    
-
-                    # cant recreate on low ping
+                    pass
+                    # next_message = 0
+                    # print(message.decode())  # server is skipping three ticks in front of client at times, usually when ping hits .7
+                    # for index, char in enumerate(message.decode()):
+                    #     if char == "}":  # todo, tell server to resynchronize at this tick/time? server will need to keep a rolling list past ticks
+                    #         next_message = index
+                    #         break
 
     def establish_connection(self):
         # self.user_name = uuid.uuid4()
@@ -242,11 +230,9 @@ class Game(Client):
                         y_change = 10
                         message = "DOWN"
 
-            while self.syncing:
-                pass
+
 
             self.socket.sendall(self.send_json({"EVENT": message}))
-
 
             if self.most_recent_message is not None:
                 if self.most_recent_message["INSTRUCTION"] == "CONTINUE":

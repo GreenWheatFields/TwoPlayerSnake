@@ -220,7 +220,6 @@ class Game(Server):
                             del self.ticks[i]
                         if i == sync_from["TIME"]:
                             flag = True
-                    self.conn.sendall(Client.send_json({"INSTRUCTION": "SYNCED"}))
 
                 else:
                     event = event["EVENT"]
@@ -265,10 +264,7 @@ class Game(Server):
             else:
                 snake.draw(xPosistion, yPosistion)
 
-            #freeze game here?
-            # if self.freeze_game:
-            #
-            #     pass
+
             response = {"INSTRUCTION": instruction,  # CONTINUE, QUIT
                         "SNAKEPOS": snake.snake,
                         "FOODPOS": food.food,
