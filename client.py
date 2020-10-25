@@ -32,6 +32,7 @@ class Client:
         self.start_time = None
         self.listener_flag = True
         self.most_recent_message = None
+        self.syncing = False
 
     @staticmethod
     def send_json(x):
@@ -71,9 +72,14 @@ class Client:
                     print(message)
                     message = json.loads(message)
                     self.socket.sendall(self.send_json({"SYNC": message["TIME"]}))
-                    # pause main game loop and wait to syncronize?
+                    self.syncing = True
+                    response = Client.wait_for_message(self.socket)
+                    if response["INSTRUCTION"] == "SYNCED":
+                        print("SYNED")
+                    self.syncing = False
+                    
+
                     # cant recreate on low ping
-                    print("fatal error")
 
     def establish_connection(self):
         # self.user_name = uuid.uuid4()
@@ -235,7 +241,13 @@ class Game(Client):
                         x_change = 0
                         y_change = 10
                         message = "DOWN"
+
+            while self.syncing:
+                pass
+
             self.socket.sendall(self.send_json({"EVENT": message}))
+
+
             if self.most_recent_message is not None:
                 if self.most_recent_message["INSTRUCTION"] == "CONTINUE":
                     snake.snake = self.most_recent_message["SNAKEPOS"]

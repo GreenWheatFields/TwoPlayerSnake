@@ -31,6 +31,7 @@ class Server:
         self.food = None
         self.snake = None
         self.start_time = 0
+        self.freeze_game = False
 
     def new_messsage(self):
         incoming = self.conn.recv(1024)
@@ -211,14 +212,15 @@ class Game(Server):
                     snake.snake = sync_from["SNAKEPOS"]
                     food.food = sync_from["FOODPOS"]
                     self.score = sync_from["SCORE"]
-                    xPosistion = snake.snake[len(snake.snake)- 1][0]
+                    xPosistion = snake.snake[len(snake.snake) - 1][0]
                     yPosistion = snake.snake[len(snake.snake) - 1][1]
                     flag = False
-                    for i in self.ticks:
+                    for i in list(self.ticks.keys()):
                         if flag:
                             del self.ticks[i]
                         if i == sync_from["TIME"]:
                             flag = True
+                    self.server_socket.sendall(Client.send_json({"INSTRUCTION": "SYNCED"}))
 
                 else:
                     event = event["EVENT"]
@@ -263,6 +265,10 @@ class Game(Server):
             else:
                 snake.draw(xPosistion, yPosistion)
 
+            #freeze game here?
+            # if self.freeze_game:
+            #
+            #     pass
             response = {"INSTRUCTION": instruction,  # CONTINUE, QUIT
                         "SNAKEPOS": snake.snake,
                         "FOODPOS": food.food,
@@ -270,6 +276,7 @@ class Game(Server):
                         "TURN": self.is_player1_turn,  # todo, figure out turn
                         "TIME": time.time()
                         }
+            #dictionary changed size while iterating
             self.ticks[response["TIME"]] = response
             self.conn.sendall(Client.send_json(response))
             if instruction == "QUIT":
