@@ -87,6 +87,7 @@ class Client:
                 self.first = incoming["FIRST"]
                 self.start_snake = incoming["SNAKE"]
                 self.start_food = incoming["FOOD"]
+                self.our_turn = incoming["FIRST"] == self.user_name
                 break
             elif incoming["INSTRUCTION"] == "WAIT":
                 print("wait instruction")
@@ -212,28 +213,27 @@ class Game(Client):
         while time.time() < float(self.start_time):
             continue
         while not game_over:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    game_over = True
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_LEFT:
-                        x_change = -10
-                        y_change = 0
-                        message = "LEFT"
-                    elif event.key == pygame.K_RIGHT:
-                        x_change = 10
-                        y_change = 0
-                        message = "RIGHT"
-                    elif event.key == pygame.K_UP:
-                        x_change = 0
-                        y_change = -10
-                        message = "UP"
-                    elif event.key == pygame.K_DOWN:
-                        x_change = 0
-                        y_change = 10
-                        message = "DOWN"
-
-
+            if self.our_turn:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        game_over = True
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_LEFT:
+                            x_change = -10
+                            y_change = 0
+                            message = "LEFT"
+                        elif event.key == pygame.K_RIGHT:
+                            x_change = 10
+                            y_change = 0
+                            message = "RIGHT"
+                        elif event.key == pygame.K_UP:
+                            x_change = 0
+                            y_change = -10
+                            message = "UP"
+                        elif event.key == pygame.K_DOWN:
+                            x_change = 0
+                            y_change = 10
+                            message = "DOWN"
 
             self.socket.sendall(self.send_json({"EVENT": message}))
 
@@ -243,6 +243,7 @@ class Game(Client):
                     food = Food(None, None, pos=self.most_recent_message["FOODPOS"])
                     self.score = self.most_recent_message["SCORE"]
                     ping = time.time() - self.most_recent_message["TIME"]
+                    self.our_turn = self.most_recent_message["TURN"] == self.user_name
                     print(ping)
                     if (ping > 2): self.game_over()
                 elif self.most_recent_message["INSTRUCTION"] == "QUIT":

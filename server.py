@@ -24,7 +24,6 @@ class Server:
         self.players = []
         self.twoPlayers = twoPlayers
         self.most_recent_message = None
-        self.is_player1_turn = False
         self.incoming_message = None
         self.listener_flag = True
         self.ticks = {}
@@ -68,7 +67,7 @@ class Server:
         self.build_window_clientside()
 
     def build_window_clientside(self):
-        self.turn = random.choice(self.players.keys())
+        self.turn = random.choice(self.players)
         self.squares = []
         x = ([1, 2], [2, 1])
         for i in range(0, width, 10):
@@ -165,7 +164,7 @@ class Snake():
 
 class Game(Server):
     def __init__(self):
-        super().__init__(twoPlayers=False)
+        super().__init__(twoPlayers=True)
         self.establish_two_connections()
         # todo, cant leave this method ^
         self.score = 0
@@ -252,13 +251,13 @@ class Game(Server):
             else:
                 snake.draw(xPosistion, yPosistion)
 
-            self.turn = self.players.keys()[0] if self.players.keys()[0]
+            self.turn = self.players[0] if self.players[0] != self.turn else self.players[1]
 
             response = {"INSTRUCTION": instruction,  # CONTINUE, QUIT
                         "SNAKEPOS": snake.snake,
                         "FOODPOS": food.food,
                         "SCORE": self.score,
-                        "TURN": self.is_player1_turn,  # todo, figure out turn
+                        "TURN": self.turn,
                         "TIME": time.time()
                         }
             #dictionary changed size while iterating
