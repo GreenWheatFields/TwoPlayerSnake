@@ -81,6 +81,7 @@ class Client:
         self.socket.send(self.send_json(response))
         while True:
             incoming = self.wait_for_message(self.socket)
+            print(incoming)
             if incoming["INSTRUCTION"] == "BUILD":
                 self.width = incoming["WIDTH"]
                 self.height = incoming["HEIGHT"]
