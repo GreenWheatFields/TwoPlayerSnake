@@ -19,7 +19,6 @@ class Server:
         self.server_socket.bind(('0.0.0.0', 13500))
         self.server_socket.listen(2)
         self.conn, self.address = self.server_socket.accept()
-        print("here")
         self.game_over = False
         self.initialized = False
         self.players = []
@@ -47,6 +46,7 @@ class Server:
 
         while len(self.players) < 2:
             incoming = Client.wait_for_message(self.conn)
+            print(incoming)
             temp = incoming["USERNAME"] not in self.players
             if temp:
                 self.players.append(incoming["USERNAME"])
