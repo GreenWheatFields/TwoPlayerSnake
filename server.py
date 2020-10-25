@@ -21,7 +21,7 @@ class Server:
         self.conn, self.address = self.server_socket.accept()
         self.game_over = False
         self.initialized = False
-        self.players = {}
+        self.players = []
         self.twoPlayers = twoPlayers
         self.most_recent_message = None
         self.is_player1_turn = False
@@ -32,14 +32,6 @@ class Server:
         self.snake = None
         self.start_time = 0
         self.freeze_game = False
-
-    def new_messsage(self):
-        incoming = self.conn.recv(1024)
-        if len(incoming) > 0:
-            self.incoming_message = json.loads(incoming.decode())
-            return True
-        else:
-            return False
 
     def listen(self):
         while self.listener_flag:
@@ -55,9 +47,9 @@ class Server:
 
         while len(self.players) < 2:
             incoming = Client.wait_for_message(self.conn)
-            temp = incoming["userName"] not in self.players
+            temp = incoming["USERNAME"] not in self.players
             if temp:
-                self.players[incoming["userName"]] = self.address[0]
+                self.players.append(incoming["USERNAME"])
                 response["WAITING"] = False if len(self.players) >= 2 else True
                 response["TIME"] = time.time()
 
@@ -67,7 +59,6 @@ class Server:
                 else:
                     pass
 
-                # todo, breaking prematurely for the sake of testing
             else:
                 response["TIME"] = time.time()
                 # this function can be cleaner.
@@ -77,10 +68,7 @@ class Server:
         self.build_window_clientside()
 
     def build_window_clientside(self):
-        temp = [self.players.keys()]
-        random.shuffle(temp)
-        # self.is_player1_turn = temp[0]
-
+        self.turn = random.choice(self.players.keys())
         self.squares = []
         x = ([1, 2], [2, 1])
         for i in range(0, width, 10):
@@ -92,7 +80,7 @@ class Server:
         self.food = Food(self.snake.snake, self.squares)
 
         response = {"INSTRUCTION": "BUILD",
-                    "FIRST": str(temp[0]),
+                    "FIRST": self.turn,
                     "WIDTH": width,
                     "HEIGHT": height,
                     "TIME": time.time(),
@@ -131,8 +119,8 @@ class Server:
             self.incoming_message = Client.wait_for_message(self.conn)
             if not self.twoPlayers:
                 break
-            elif self.address not in players_ready:
-                players_ready.append(self.address)
+            elif self.incoming_message["USERNAME"] not in players_ready:
+                players_ready.append(self.incoming_message["USERNAME"])
 
 
 
@@ -199,7 +187,7 @@ class Game(Server):
         clock = pygame.time.Clock()
         snake = Snake(self.snake.snake[0][0], self.snake.snake[0][1])
         food = Food(snake.snake, self.squares, pos=self.food.food)
-        # s = pygame.font.SysFont("comicsansms",25)
+
         while time.time() < self.start_time:
             continue
         listener = threading.Thread(target=self.listen)
@@ -264,6 +252,7 @@ class Game(Server):
             else:
                 snake.draw(xPosistion, yPosistion)
 
+            self.turn = self.players.keys()[0] if self.players.keys()[0]
 
             response = {"INSTRUCTION": instruction,  # CONTINUE, QUIT
                         "SNAKEPOS": snake.snake,

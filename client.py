@@ -33,6 +33,7 @@ class Client:
         self.listener_flag = True
         self.most_recent_message = None
         self.syncing = False
+        self.our_turn = None
 
     @staticmethod
     def send_json(x):
@@ -74,8 +75,9 @@ class Client:
         self.socket.connect(('54.242.88.162', 13500))
 
     def init_game(self):
-        response = {"userName": str(uuid.uuid4()),
-                    "time": time.time()}
+        self.user_name = str(uuid.uuid4())
+        response = {"USERNAME": self.user_name,
+                    "TIME": time.time()}
         self.socket.send(self.send_json(response))
         while True:
             incoming = self.wait_for_message(self.socket)
@@ -106,7 +108,8 @@ class Client:
 
     def notify_and_sync(self):
         message = {"READY": True,
-                   "TIME": time.time()}
+                   "TIME": time.time(),
+                   "USERNAME": self.user_name}
         self.socket.sendall(self.send_json(message))
         while True:
             incoming = self.wait_for_message(self.socket)
@@ -115,7 +118,7 @@ class Client:
                 break
             else:
                 continue
-        self.socket.sendall(self.send_json({"PLACEHOLDER": True}))
+        self.socket.sendall(self.send_json({"USERNAME": self.user_name}))
 
 
 class Board():
