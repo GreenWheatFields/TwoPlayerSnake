@@ -73,7 +73,6 @@ class Client:
     def establish_connection(self):
         # self.user_name = uuid.uuid4()
         self.socket.connect(('54.242.88.162', 13500))
-        print("conencted")
 
     def init_game(self):
         self.user_name = str(uuid.uuid4())
@@ -81,7 +80,7 @@ class Client:
                     "TIME": time.time()}
         self.socket.send(self.send_json(response))
         while True:
-            incoming = self.wait_for_message(self.socket)
+            incoming = self.wait_for_message(self.socket) # bottleneck is here
             print(incoming)
             if incoming["INSTRUCTION"] == "BUILD":
                 self.width = incoming["WIDTH"]

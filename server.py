@@ -32,6 +32,7 @@ class Server:
         self.start_time = 0
         self.freeze_game = False
 
+
     def listen(self):
         while self.listener_flag:
             response = self.conn.recv(1024)
@@ -53,7 +54,7 @@ class Server:
                 response["WAITING"] = False if len(self.players) >= 2 else True
                 response["TIME"] = time.time()
 
-                self.conn.sendall(Client.send_json(response))
+                self.conn.sendto(Client.send_json(response), self.address)
                 if not self.twoPlayers:
                     break
                 else:
