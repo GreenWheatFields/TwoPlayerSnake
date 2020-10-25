@@ -45,7 +45,6 @@ class Server:
                     "WAITING": True}
 
         while len(self.players) < 2:
-            self.server_socket.accept()
             incoming = Client.wait_for_message(self.conn)
             print(incoming)
             temp = incoming["USERNAME"] not in self.players
