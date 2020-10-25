@@ -39,6 +39,7 @@ class Server:
             if len(response) > 0:
                 self.most_recent_message = Client.read_json(response)
 
+
     def establish_two_connections(self):
         response = {"INSTRUCTION": "WAIT",
                     "WIDTH": width,
