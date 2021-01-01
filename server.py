@@ -4,6 +4,7 @@ import json
 import random
 import pygame
 import threading
+from threading import *
 import sys
 from client import Client
 
@@ -16,9 +17,9 @@ class Server:
 
     def __init__(self, twoPlayers=True):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_socket.bind(('0.0.0.0', 13500))
+        self.server_socket.bind(('localhost', 13500))
         self.server_socket.listen(2)
-        self.conn, self.address = self.server_socket.accept()
+        self.conn = self.server_socket
         self.game_over = False
         self.initialized = False
         self.players = []
@@ -32,21 +33,22 @@ class Server:
         self.start_time = 0
         self.freeze_game = False
 
-
     def listen(self):
         while self.listener_flag:
             response = self.conn.recv(1024)
             if len(response) > 0:
                 self.most_recent_message = Client.read_json(response)
 
-
     def establish_two_connections(self):
+        # todo, create two threads and pass them two socket connections
         response = {"INSTRUCTION": "WAIT",
                     "WIDTH": width,
                     "HEIGHT": height,
                     "WAITING": True}
 
         while len(self.players) < 2:
+            conn, address = self.conn.accept()
+            print(address)
             incoming = Client.wait_for_message(self.conn)
             print(incoming)
             temp = incoming["USERNAME"] not in self.players
@@ -125,13 +127,13 @@ class Server:
                 players_ready.append(self.incoming_message["USERNAME"])
 
 
-
 class Food:
     def __init__(self, snake, squares: tuple, pos=None):
         if pos is not None:
             self.food = pos
         else:
             self.food = self.spawnFood(squares, snake)
+
     def spawnFood(self, squares, snake):
         valid_squares = list(squares)
         for j in snake:
@@ -263,7 +265,7 @@ class Game(Server):
                         "TURN": self.turn,
                         "TIME": time.time()
                         }
-            #dictionary changed size while iterating
+            # dictionary changed size while iterating
             self.ticks[response["TIME"]] = response
             self.conn.sendall(Client.send_json(response))
             if instruction == "QUIT":
@@ -272,7 +274,6 @@ class Game(Server):
             clock.tick(15)
         pygame.quit()
         quit()
-
 
     def end_game(self):
         self.server_socket.close()
@@ -285,4 +286,3 @@ class Game(Server):
 if __name__ == '__main__':
     game = Game()
     game.start()
-
