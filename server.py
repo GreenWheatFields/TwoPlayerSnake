@@ -7,6 +7,7 @@ import threading
 from threading import *
 import sys
 from client import Client
+from client_handler import ClientHandler
 
 width = 500
 height = 500
@@ -15,15 +16,15 @@ white = (255, 255, 255)
 
 class Server:
 
-    def __init__(self, twoPlayers=True):
+    def __init__(self, twoPlayers=True, client_limit = 2):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.bind(('localhost', 13500))
         self.server_socket.listen(2)
-        self.conn = self.server_socket
         self.game_over = False
         self.initialized = False
         self.players = []
         self.twoPlayers = twoPlayers
+        self.client_limit = client_limit
         self.most_recent_message = None
         self.incoming_message = None
         self.listener_flag = True
@@ -32,7 +33,14 @@ class Server:
         self.snake = None
         self.start_time = 0
         self.freeze_game = False
+        self.client_handlers = []
 
+    def start_server(self):
+        # todo, handle init process inside here
+        for _ in range(self.client_limit):
+            self.client_handlers.append(ClientHandler())
+            pass
+        self.client_handlers[0].test()
     def listen(self):
         while self.listener_flag:
             response = self.conn.recv(1024)
@@ -127,6 +135,7 @@ class Server:
                 players_ready.append(self.incoming_message["USERNAME"])
 
 
+
 class Food:
     def __init__(self, snake, squares: tuple, pos=None):
         if pos is not None:
@@ -168,6 +177,8 @@ class Snake():
 
 
 class Game(Server):
+    # todo start method is a mess. does way to much. needs an init method,
+    #  and packets should be analyzed in a loop from outside the game class
     def __init__(self):
         super().__init__(twoPlayers=True)
         self.establish_two_connections()
@@ -284,5 +295,5 @@ class Game(Server):
 
 
 if __name__ == '__main__':
-    game = Game()
-    game.start()
+    server = Server()
+    server.start_server()
