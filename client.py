@@ -5,7 +5,7 @@ import json
 import pygame
 import sys
 import threading
-
+from connection_behavior import *
 # #todo, small window that shows while attempting to connect. automatically closes when client receives instruction to build window
 
 
@@ -35,32 +35,13 @@ class Client:
         self.syncing = False
         self.our_turn = None
 
-    @staticmethod
-    def send_json(x):
-        return json.dumps(x).encode()
-
-    @staticmethod
-    def read_json(x):
-        return json.loads(x.decode())
-
-    @staticmethod
-    def wait_for_message(socket: socket.socket):
-        # todo,timeout?
-        incoming = None
-        while incoming is None:
-            incoming = socket.recv(1024)
-            if len(incoming) > 0:
-                response = Game.read_json(incoming)
-                return response
-            else:
-                incoming = None
 
     def listen(self):
         while self.listener_flag:
             message = self.socket.recv(1024)
             if len(message) > 0:
                 try:
-                    self.most_recent_message = self.read_json(message)
+                    self.most_recent_message = read_json(message)
                 except ValueError as v:
                     pass
                     # next_message = 0
@@ -75,12 +56,13 @@ class Client:
         self.socket.connect(('localhost', 13500))
 
     def init_game(self):
+        #todo, server shuold gen username. identify by ip/port?
         self.user_name = str(uuid.uuid4())
         response = {"USERNAME": self.user_name,
                     "TIME": time.time()}
-        self.socket.send(self.send_json(response))
+        self.socket.send(send_json(response))
         while True:
-            incoming = self.wait_for_message(self.socket) # bottleneck is here
+            incoming = wait_for_message(self.socket) # bottleneck is here
             print(incoming)
             if incoming["INSTRUCTION"] == "BUILD":
                 self.width = incoming["WIDTH"]
@@ -112,15 +94,15 @@ class Client:
         message = {"READY": True,
                    "TIME": time.time(),
                    "USERNAME": self.user_name}
-        self.socket.sendall(self.send_json(message))
+        self.socket.sendall(send_json(message))
         while True:
-            incoming = self.wait_for_message(self.socket)
+            incoming = wait_for_message(self.socket)
             if incoming["INSTRUCTION"] == "PLAY":
                 self.start_time = incoming["STARTTIME"]
                 break
             else:
                 continue
-        self.socket.sendall(self.send_json({"USERNAME": self.user_name}))
+        self.socket.sendall(send_json({"USERNAME": self.user_name}))
 
 
 class Board():
@@ -236,7 +218,7 @@ class Game(Client):
                             y_change = 10
                             message = "DOWN"
 
-            self.socket.sendall(self.send_json({"EVENT": message}))
+            self.socket.sendall(send_json({"EVENT": message}))
 
             if self.most_recent_message is not None:
                 if self.most_recent_message["INSTRUCTION"] == "CONTINUE":

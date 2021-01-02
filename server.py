@@ -1,13 +1,10 @@
-import socket
 import time
-import json
 import random
 import pygame
 import threading
 from threading import *
-import sys
-from client import Client
 from client_handler import ClientHandler
+from connection_behavior import *
 
 width = 500
 height = 500
@@ -20,6 +17,7 @@ class Server:
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.bind(('localhost', 13500))
         self.server_socket.listen(2)
+        self.conn = self.server_socket
         self.game_over = False
         self.initialized = False
         self.players = []
@@ -37,18 +35,19 @@ class Server:
 
     def start_server(self):
         # todo, handle init process inside here
-        for _ in range(self.client_limit):
-            self.client_handlers.append(ClientHandler())
-            pass
-        self.client_handlers[0].test()
+
+        self.establish_two_connections()
+
+
     def listen(self):
         while self.listener_flag:
             response = self.conn.recv(1024)
             if len(response) > 0:
-                self.most_recent_message = Client.read_json(response)
+                self.most_recent_message = read_json(response)
 
     def establish_two_connections(self):
         # todo, create two threads and pass them two socket connections
+        # todo, client limit
         response = {"INSTRUCTION": "WAIT",
                     "WIDTH": width,
                     "HEIGHT": height,
@@ -56,8 +55,10 @@ class Server:
 
         while len(self.players) < 2:
             conn, address = self.conn.accept()
+            self.client_handlers.append(ClientHandler(conn))
             print(address)
-            incoming = Client.wait_for_message(self.conn)
+            #start thread wait for message
+            incoming = wait_for_message(self.conn)
             print(incoming)
             temp = incoming["USERNAME"] not in self.players
             if temp:
@@ -65,7 +66,7 @@ class Server:
                 response["WAITING"] = False if len(self.players) >= 2 else True
                 response["TIME"] = time.time()
 
-                self.conn.sendto(Client.send_json(response), self.address)
+                self.conn.sendto(send_json(response), self.address)
                 if not self.twoPlayers:
                     break
                 else:
@@ -74,7 +75,7 @@ class Server:
             else:
                 response["TIME"] = time.time()
                 # this function can be cleaner.
-                self.conn.sendall(Client.send_json(response))
+                self.conn.sendall(send_json(response))
 
         print("ESTABLISHED TWO CONNS")
         self.build_window_clientside()
@@ -99,12 +100,12 @@ class Server:
                     "SNAKE": self.snake.snake,
                     "FOOD": self.food.food
                     }
-        self.conn.sendall(Client.send_json(response))
+        self.conn.sendall(send_json(response))
         while not self.initialized:
             # wait for both clients to report as built and ready
             players_ready = {}
             while len(players_ready) < 2:
-                self.incoming_message = Client.wait_for_message(self.conn)
+                self.incoming_message = wait_for_message(self.conn)
                 try:
                     if self.incoming_message["READY"]:
                         print("READY MESSAGE")
@@ -125,10 +126,10 @@ class Server:
             "INSTRUCTION": "PLAY",
             "STARTTIME": str(self.start_time)
         }
-        self.conn.sendall(Client.send_json(message))
+        self.conn.sendall(send_json(message))
         players_ready = []
         while len(players_ready) < 2 or time.time() < self.start_time:
-            self.incoming_message = Client.wait_for_message(self.conn)
+            self.incoming_message = wait_for_message(self.conn)
             if not self.twoPlayers:
                 break
             elif self.incoming_message["USERNAME"] not in players_ready:
@@ -278,7 +279,7 @@ class Game(Server):
                         }
             # dictionary changed size while iterating
             self.ticks[response["TIME"]] = response
-            self.conn.sendall(Client.send_json(response))
+            self.conn.sendall(send_json(response))
             if instruction == "QUIT":
                 self.end_game()
 
