@@ -58,6 +58,7 @@ class Server:
             if lobby.assigned_threads == 2:
                 lobby = Lobby()
             conn, address = self.conn.accept()
+            print("here")
             self.client_handlers.append(ClientHandler(conn, lobby).start())
             lobby.assigned_threads += 1
         #     incoming = wait_for_message(self.conn)

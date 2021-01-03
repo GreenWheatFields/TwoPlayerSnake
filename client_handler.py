@@ -26,6 +26,7 @@ class ClientHandler(Thread):
                     "WIDTH": self.width,
                     "HEIGHT": self.height,
                     "WAITING": True}
+        print("here")
         incoming = wait_for_message(self.conn)
         temp = incoming["USERNAME"] not in self.lobby.players
         if temp:

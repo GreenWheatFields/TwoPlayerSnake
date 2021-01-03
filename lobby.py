@@ -4,12 +4,13 @@ from threading import Lock
 import random
 import sys
 # todo, no need for this to be in server class. also these classes should have  server=False
-from server import Snake, Food
+# from server import Snake, Food
 
 
-class Lobby(Lock):
+class Lobby():
     def __init__(self):
         super().__init__()
+        self._lock = Lock()
         self.handlers = {}
         self.players = []
         self.assigned_threads = 0
@@ -20,6 +21,10 @@ class Lobby(Lock):
         self.food = None
         self.players_ready = []
 
+    def acquire(self):
+        self._lock.acquire()
+    def release(self):
+        self._lock.release()
     def init_game_state(self, width, height):
         self.turn = random.choice(self.players)
         temp = []
@@ -27,8 +32,8 @@ class Lobby(Lock):
             for j in range(0, height, 10):
                 temp.append([i, j])
         self.squares = tuple(temp)
-        self.snake = Snake(200, 150)
-        self.food = Food(self.snake.snake, self.squares)
+        # self.snake = Snake(200, 150)
+        # self.food = Food(self.snake.snake, self.squares)
         self.init_flag = True
 
     def notify_player_ready(self, username: str):
