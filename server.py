@@ -5,6 +5,7 @@ import threading
 from threading import *
 from client_handler import ClientHandler
 from connection_behavior import *
+from lobby import Lobby
 
 width = 500
 height = 500
@@ -52,12 +53,13 @@ class Server:
                     "WIDTH": width,
                     "HEIGHT": height,
                     "WAITING": True}
-
+        lobby = Lobby()
         while len(self.players) < 2:
+            if lobby.assigned_threads == 2:
+                lobby = Lobby()
             conn, address = self.conn.accept()
-            self.client_handlers.append(ClientHandler(conn))
-            print(address)
-            #start thread wait for message
+            self.client_handlers.append(ClientHandler(conn, lobby).start())
+            lobby.assigned_threads += 1
             incoming = wait_for_message(self.conn)
             print(incoming)
             temp = incoming["USERNAME"] not in self.players
