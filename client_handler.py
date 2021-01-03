@@ -12,7 +12,7 @@ class ClientHandler(Thread):
 
     def __init__(self, conn: socket.socket, lobby: Lobby):
         super().__init__()
-        self.conn = None
+        self.conn = conn
         self.lobby = lobby
         self.width = 500
         self.height = 500
@@ -26,7 +26,6 @@ class ClientHandler(Thread):
                     "WIDTH": self.width,
                     "HEIGHT": self.height,
                     "WAITING": True}
-        print("here")
         incoming = wait_for_message(self.conn)
         temp = incoming["USERNAME"] not in self.lobby.players
         if temp:
@@ -80,8 +79,10 @@ class ClientHandler(Thread):
         self.conn.send(send_json(message))
     def run(self):
         self.make_first_contact()
+        print("waiting")
         while len(self.lobby.players) < 2:
             pass
+        print("not waiting")
         self.send_build_instruction()
         self.wait_for_client_to_build()
 
