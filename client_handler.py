@@ -54,8 +54,8 @@ class ClientHandler(Thread):
                     "WIDTH": self.width,
                     "HEIGHT": self.height,
                     "TIME": time.time(),
-                    "SNAKE": self.lobby.snake.snake,
-                    "FOOD": self.lobby.food.food
+                    "SNAKE": self.lobby.game.snake.snake,
+                    "FOOD": self.lobby.game.food.food
                     }
         self.conn.send(send_json(response))
         self.lobby.release()

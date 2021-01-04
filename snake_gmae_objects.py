@@ -13,6 +13,7 @@ class Board():
         self.dis = pygame.display.set_mode((width, height))
         pygame.display.set_caption("2PSnake")
 
+
 class Food:
     def __init__(self, snake, squares: tuple, pos=None):
         if pos is not None:
@@ -22,7 +23,7 @@ class Food:
 
     def draw(self):
         pygame.draw.rect(board.dis, (24, 252, 0), [self.food[0], self.food[1], 10, 10])
-    
+
     def spawnFood(self, squares, snake):
         valid_squares = list(squares)
         for j in snake:
@@ -64,17 +65,22 @@ class Snake():
 
 
 class Game:
-    def __init__(self, server=True):
+    def __init__(self, width, height, server=True):
         self.server = server
         self.score = 0
         self.squares = []
-        x = ([1,2], [2,1])
-        for i in range(0,width, 10):
-            for j in range(0,height, 10):
-                self.squares.append([i,j])
+        self.board = None
+        x = ([1, 2], [2, 1])
+        for i in range(0, width, 10):
+            for j in range(0, height, 10):
+                self.squares.append([i, j])
         self.squares = tuple(self.squares)
-        self.food = None
-        self.snake = None
+        if server:
+            self.board = Board()
+        self.snake = Snake(200, 150, self.board)
+        self.food = Food(self.snake, self.squares)
+        self.xPos = 200
+        self.yPos = 150
 
     def start(self, food, snake):
         pygame.init()  # init outside class?
@@ -84,48 +90,44 @@ class Game:
             s = pygame.font.SysFont("comicsansms", 25)
         game_over = False
         x_change = y_change = 0
-
-        xPosistion = 200
-        yPosistion = 150
         clock = pygame.time.Clock()
-        self.food = food
-        self.snake = snake
-        # snake = Snake(xPosistion, yPosistion, board)
-        # food = Food(snake.snake, self.squares)
-
-        while not game_over:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    game_over = True
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_LEFT:
-                        x_change = -10
-                        y_change = 0
-                    elif event.key == pygame.K_RIGHT:
-                        x_change = 10
-                        y_change = 0
-                    elif event.key == pygame.K_UP:
-                        x_change = 0
-                        y_change = -10
-                    elif event.key == pygame.K_DOWN:
-                        x_change = 0
-                        y_change = 10
-            print(xPosistion, yPosistion)
-            if xPosistion > width - 10 or xPosistion < 0 or yPosistion >= height or yPosistion < 0:
-               self.game_over()
-            elif xPosistion == food.food[0] and yPosistion == food.food[1]:
+        if not self.server:
+            while not game_over:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        game_over = True
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_LEFT:
+                            x_change = -10
+                            y_change = 0
+                        elif event.key == pygame.K_RIGHT:
+                            x_change = 10
+                            y_change = 0
+                        elif event.key == pygame.K_UP:
+                            x_change = 0
+                            y_change = -10
+                        elif event.key == pygame.K_DOWN:
+                            x_change = 0
+                            y_change = 10
+            else:
+                #pass in input from thread
+                pass
+            print(self.xPos, self.yPos)
+            if self.xPos > width - 10 or self.xPos < 0 or self.xPos >= height or self.yPos < 0:
+                return self.game_over() if not self.server else True
+            elif self.xPos == food.food[0] and self.yPos == food.food[1]:
                 snake.eat(food.food[0], food.food[1])
                 self.score += 1
                 food = Food(snake.snake, self.squares)
             elif snake.isCollision(x_change, y_change):
-                self.game_over()
+                return self.game_over() if not self.server else True
 
-            xPosistion += x_change
-            yPosistion += y_change
+            self.xPos += x_change
+            self.yPos += y_change
             if not self.server:
                 board.dis.fill((0, 0, 0))
                 self.food.draw()
-                self.snake.draw(xPosistion, yPosistion)
+                self.snake.draw(self.xPos, self.yPos)
                 v = s.render(str(self.score), True, white)
                 board.dis.blit(v, [0, 0])
                 pygame.display.update()
@@ -137,6 +139,7 @@ class Game:
     def game_over(self):
         pygame.quit()
         quit()
+
 
 if __name__ == '__main__':
     g = Game()

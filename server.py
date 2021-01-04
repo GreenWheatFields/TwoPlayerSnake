@@ -6,7 +6,7 @@ from threading import *
 from client_handler import ClientHandler
 from connection_behavior import *
 from lobby import Lobby
-from Snake import Food, Snake
+from snake_gmae_objects import Food, Snake
 
 width = 500
 height = 500
