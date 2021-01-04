@@ -9,6 +9,7 @@ from connection_behavior import *
 
 class ClientHandler(Thread):
     # one per client for now
+    # ideally, there would be one send method that takes a message / response behavior parameter. but wwhatever
 
     def __init__(self, conn: socket.socket, lobby: Lobby):
         super().__init__()
@@ -17,6 +18,7 @@ class ClientHandler(Thread):
         self.width = 500
         self.height = 500
         self.username = ""
+        self.synced = False
 
     def establish_conn(self):
         pass
@@ -42,7 +44,8 @@ class ClientHandler(Thread):
 
     def send_build_instruction(self):
         self.lobby.acquire()
-        if self.lobby.init_flag:
+        if False:
+            print("init")
             self.lobby.release()
         else:
             self.lobby.init_game_state(self.width, self.height)
@@ -55,6 +58,8 @@ class ClientHandler(Thread):
                     "FOOD": self.lobby.food.food
                     }
         self.conn.send(send_json(response))
+        self.lobby.release()
+
     def wait_for_client_to_build(self):
         flag = False
         while True:
@@ -66,25 +71,25 @@ class ClientHandler(Thread):
                     break
             except KeyError:
                 pass
-            if len(self.lobby.players_ready) == 2:
-                flag = True
+        flag = len(self.lobby.players_ready) == 2
         self.lobby.release()
         if flag:
+            print("here")
             self.lobby.sync()
+
     def send_sync_message(self, time):
         message = {
             "INSTRUCTION": "PLAY",
             "STARTTIME": str(time)
         }
         self.conn.send(send_json(message))
+        response = wait_for_message(self.conn)
+        # assume correct response
+        self.synced = True
+
     def run(self):
         self.make_first_contact()
-        print("waiting")
         while len(self.lobby.players) < 2:
             pass
-        print("not waiting")
         self.send_build_instruction()
         self.wait_for_client_to_build()
-
-
-

@@ -4,7 +4,7 @@ from threading import Lock
 import random
 import sys
 # todo, no need for this to be in server class. also these classes should have  server=False
-# from server import Snake, Food
+from Snake import Snake, Food, Board
 
 
 class Lobby():
@@ -23,8 +23,10 @@ class Lobby():
 
     def acquire(self):
         self._lock.acquire()
+
     def release(self):
         self._lock.release()
+
     def init_game_state(self, width, height):
         self.turn = random.choice(self.players)
         temp = []
@@ -32,23 +34,26 @@ class Lobby():
             for j in range(0, height, 10):
                 temp.append([i, j])
         self.squares = tuple(temp)
-        # self.snake = Snake(200, 150)
-        # self.food = Food(self.snake.snake, self.squares)
+        self.snake = Snake(200, 150, None)
+        self.food = Food(self.snake.snake, self.squares)
         self.init_flag = True
 
     def notify_player_ready(self, username: str):
         if username not in self.players_ready:
             self.players_ready.append(username)
+
     def sync(self):
-        sys
-        # start_time = time.time() + .25
-        # for client_handler in self.handlers.values():
-        #     pass
-        # while len(players_ready) < 2 or time.time() < self.start_time:
-        #     self.incoming_message = wait_for_message(self.conn)
-        #     if not self.twoPlayers:
-        #         break
-        #     elif self.incoming_message["USERNAME"] not in players_ready:
-        #         players_ready.append(self.incoming_message["USERNAME"])
+        self.players_ready = []
+        start_time = time.time() + .25
+        for client_handler in self.handlers.values():
+            client_handler.send_sync_message(start_time)
+        while len(self.players_ready) < 2 and time.time() < start_time:
+            for client_handler in self.handlers.values():
+                if client_handler.synced:
+                    if client_handler.username not in self.players_ready:
+                        self.players_ready.append(client_handler.username)
+        # begin game here. clients freeze here
+
+
     def run_game(self):
         pass

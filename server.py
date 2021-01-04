@@ -6,6 +6,7 @@ from threading import *
 from client_handler import ClientHandler
 from connection_behavior import *
 from lobby import Lobby
+from Snake import Food, Snake
 
 width = 500
 height = 500
@@ -137,46 +138,6 @@ class Server:
             elif self.incoming_message["USERNAME"] not in players_ready:
                 players_ready.append(self.incoming_message["USERNAME"])
 
-
-
-class Food:
-    def __init__(self, snake, squares: tuple, pos=None):
-        if pos is not None:
-            self.food = pos
-        else:
-            self.food = self.spawnFood(squares, snake)
-
-    def spawnFood(self, squares, snake):
-        valid_squares = list(squares)
-        for j in snake:
-            for index, i in enumerate(valid_squares):
-                if j == i:
-                    valid_squares.pop(index)
-        return random.choice(valid_squares)
-
-
-class Snake():
-    def __init__(self, x: int, y: int):
-        self.snake = [[x, y]]
-
-    def draw(self, newX, newY):
-        self.snake.append([newX, newY])
-        self.snake.pop(0)
-
-    def eat(self, x, y):
-        self.snake.append([x, y])
-
-    def isCollision(self, x, y):
-        snake_head = self.snake[len(self.snake) - 1]
-        if [snake_head[0], snake_head[1]] in self.snake[0:len(self.snake) - 1]:
-            return True
-        elif len(self.snake) == 2:
-            if y == 0:
-                if self.snake[1][0] + x == self.snake[0][0]:
-                    return True
-            elif x == 0:
-                if self.snake[1][1] + y == self.snake[0][1]:
-                    return True
 
 
 class Game(Server):

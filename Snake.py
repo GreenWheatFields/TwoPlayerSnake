@@ -14,13 +14,16 @@ class Board():
         pygame.display.set_caption("2PSnake")
 
 class Food:
-    def __init__(self, snake, squares: tuple):
-        self.food = self.spawnFood(squares, snake)
+    def __init__(self, snake, squares: tuple, pos=None):
+        if pos is not None:
+            self.food = pos
+        else:
+            self.food = self.spawnFood(squares, snake)
 
     def draw(self):
         pygame.draw.rect(board.dis, (24, 252, 0), [self.food[0], self.food[1], 10, 10])
     
-    def spawnFood(self ,squares, snake):
+    def spawnFood(self, squares, snake):
         valid_squares = list(squares)
         for j in snake:
             for index, i in enumerate(valid_squares):
@@ -30,19 +33,19 @@ class Food:
 
 
 class Snake():
-    def __init__(self, x: int, y: int, board: Board):
-        self.board = board
-        pygame.draw.rect(board.dis, white, [x, y, 10, 10])
+    def __init__(self, x: int, y: int, board, server=True):
+        self.server = server
+        if not server:
+            self.board = board
+            pygame.draw.rect(board.dis, white, [x, y, 10, 10])
         self.snake = [[x, y]]
-    
-    
-        
 
     def draw(self, newX, newY):
         self.snake.append([newX, newY])
         self.snake.pop(0)
-        for i in self.snake:
-            pygame.draw.rect(self.board.dis, white, [i[0], i[1], 10, 10])
+        if not self.server:
+            for i in self.snake:
+                pygame.draw.rect(self.board.dis, white, [i[0], i[1], 10, 10])
 
     def eat(self, x, y):
         self.snake.append([x, y])
@@ -61,7 +64,8 @@ class Snake():
 
 
 class Game:
-    def __init__(self):
+    def __init__(self, server=True):
+        self.server = server
         self.score = 0
         self.squares = []
         x = ([1,2], [2,1])
@@ -69,20 +73,25 @@ class Game:
             for j in range(0,height, 10):
                 self.squares.append([i,j])
         self.squares = tuple(self.squares)
+        self.food = None
+        self.snake = None
 
-    def start(self):
+    def start(self, food, snake):
         pygame.init()  # init outside class?
-        global board
-        board = Board()
+        if not self.server:
+            global board
+            board = Board()
+            s = pygame.font.SysFont("comicsansms", 25)
         game_over = False
         x_change = y_change = 0
 
         xPosistion = 200
         yPosistion = 150
         clock = pygame.time.Clock()
-        snake = Snake(xPosistion, yPosistion, board)
-        food = Food(snake.snake, self.squares)
-        s = pygame.font.SysFont("comicsansms",25)
+        self.food = food
+        self.snake = snake
+        # snake = Snake(xPosistion, yPosistion, board)
+        # food = Food(snake.snake, self.squares)
 
         while not game_over:
             for event in pygame.event.get():
@@ -113,15 +122,14 @@ class Game:
 
             xPosistion += x_change
             yPosistion += y_change
-
-            board.dis.fill((0, 0, 0))
-            food.draw()
-            snake.draw(xPosistion, yPosistion)
-
-            v = s.render(str(self.score), True, white)
-            board.dis.blit(v, [0, 0])
-
-            pygame.display.update()
+            if not self.server:
+                board.dis.fill((0, 0, 0))
+                self.food.draw()
+                self.snake.draw(xPosistion, yPosistion)
+                v = s.render(str(self.score), True, white)
+                board.dis.blit(v, [0, 0])
+                pygame.display.update()
+            # todo, implement clock myself
             clock.tick(15)
         pygame.quit()
         quit()
