@@ -50,15 +50,21 @@ class Lobby():
                         self.players_ready.append(client_handler.username)
         # begin game here. clients freeze here
         # todo, check for timeour
+
     def run_game(self):
         while time.time() < self.start_time:
             pass
         #senf the snake moving up . dont wait for user input to start game
         while True:
-            self.game.
+            clock = time.clock()
+            self.game.start()
+            # self.game.
+            pass
 
         pass
 
 
     def run_game(self):
         pass
+
+
