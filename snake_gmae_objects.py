@@ -4,12 +4,11 @@ import pygame
 import random
 
 white = (255, 255, 255)
-width, height = 500, 500
 global board
 
 
-class Board():
-    def __init__(self):
+class Board:
+    def __init__(self, width, height):
         self.dis = pygame.display.set_mode((width, height))
         pygame.display.set_caption("2PSnake")
 
@@ -21,12 +20,12 @@ class Food:
         else:
             self.food = self.spawnFood(squares, snake)
 
-    def draw(self):
+    def draw(self, board):
         pygame.draw.rect(board.dis, (24, 252, 0), [self.food[0], self.food[1], 10, 10])
 
     def spawnFood(self, squares, snake):
         valid_squares = list(squares)
-        for j in snake:
+        for j in snake.snake:
             for index, i in enumerate(valid_squares):
                 if j == i:
                     valid_squares.pop(index)
@@ -41,12 +40,12 @@ class Snake():
             pygame.draw.rect(board.dis, white, [x, y, 10, 10])
         self.snake = [[x, y]]
 
-    def draw(self, newX, newY):
+    def draw(self, board,color,newX, newY):
         self.snake.append([newX, newY])
         self.snake.pop(0)
         if not self.server:
             for i in self.snake:
-                pygame.draw.rect(self.board.dis, white, [i[0], i[1], 10, 10])
+                pygame.draw.rect(board.dis, color, [i[0], i[1], 10, 10])
 
     def eat(self, x, y):
         self.snake.append([x, y])
@@ -75,21 +74,21 @@ class Game:
             for j in range(0, height, 10):
                 self.squares.append([i, j])
         self.squares = tuple(self.squares)
-        if server:
-            self.board = Board()
+        if not server:
+            self.width = width
+            self.heigt = height
+            self.board = Board(width, height)
         self.snake = Snake(200, 150, self.board)
         self.food = Food(self.snake, self.squares)
         self.xPos = 200
         self.yPos = 150
         self.is_game_over = False
 
-    def start(self):
+    def start(self, event=None):
         # for now. server = True basicallt doesnt let Game() control itself while Client() does.
         def initGame():
             pygame.init()  # init outside class?
             if not self.server:
-                global board
-                board = Board()
                 self.font = pygame.font.SysFont("comicsansms", 25)
                 self.clock = pygame.time.Clock()
 
@@ -101,10 +100,10 @@ class Game:
                 for event in pygame.event.get():
                     x_change, y_change = self.analyze_event(event)
             else:
-                x_change, y_change = self.analyze_event()
+                x_change, y_change = self.analyze_event(event)
                 pass
             print(self.xPos, self.yPos)
-            if self.xPos > width - 10 or self.xPos < 0 or self.xPos >= height or self.yPos < 0:
+            if self.xPos > self.width - 10 or self.xPos < 0 or self.xPos >= self.height or self.yPos < 0:
                 return self.game_over() if not self.server else True
             elif self.xPos == self.food.food[0] and self.yPos == self.food.food[1]:
                 self.snake.eat(self.food.food[0], self.food.food[1])

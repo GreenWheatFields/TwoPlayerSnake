@@ -61,26 +61,7 @@ class Server:
             conn, address = self.conn.accept()
             self.client_handlers.append(ClientHandler(conn, lobby).start())
             lobby.assigned_threads += 1
-        #     incoming = wait_for_message(self.conn)
-        #     print(incoming)
-        #     temp = incoming["USERNAME"] not in self.players
-        #     if temp:
-        #         self.players.append(incoming["USERNAME"])
-        #         response["WAITING"] = False if len(self.players) >= 2 else True
-        #         response["TIME"] = time.time()
-        #
-        #         self.conn.sendto(send_json(response), self.address)
-        #         if not self.twoPlayers:
-        #             break
-        #         else:
-        #             pass
-        #
-        #     else:
-        #         response["TIME"] = time.time()
-        #         # this function can be cleaner.
-        #         self.conn.sendall(send_json(response))
-        #
-        # print("ESTABLISHED TWO CONNS")
+
         self.build_window_clientside()
 
     def build_window_clientside(self):

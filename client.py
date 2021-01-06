@@ -178,24 +178,22 @@ class Game(Client):
 
     def start(self):
         pygame.init()
-        global board
         board = Board(self.width, self.height)
         game_over = False
         x_change = y_change = 0
         xPosistion = 200
         yPosistion = 150
         clock = pygame.time.Clock()
-        snake = Snake(self.start_snake[0][0], self.start_snake[0][1], board)
+        snake = Snake(self.start_snake[0][0], self.start_snake[0][1], board, server=False)
         food = Food(snake.snake, self.squares, pos=self.start_food)
         ping = 0
-        food.draw()
-        snake.draw(white)
+        food.draw(board)
+        snake.draw(board, white, xPosistion, yPosistion)
         pygame.display.update()
         s = pygame.font.SysFont("comicsansms", 25)
         message = "NONE"
-        print("about to wait")
         while time.time() < float(self.start_time):
-            continue
+            pass
         while not game_over:
             if self.our_turn:
                 for event in pygame.event.get():
@@ -237,8 +235,8 @@ class Game(Client):
             yPosistion += y_change
 
             board.dis.fill((0, 0, 0))
-            food.draw()
-            snake.draw(red if self.most_recent_message is not None and self.most_recent_message["TURN"] == True else blue)
+            food.draw(board)
+            snake.draw(board, red if self.most_recent_message is not None and self.most_recent_message["TURN"] == True else blue, xPosistion, xPosistion)
             v = s.render(str(self.score), True, white)
             board.dis.blit(v, [0, 0])
 

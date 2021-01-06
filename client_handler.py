@@ -19,6 +19,8 @@ class ClientHandler(Thread):
         self.height = 500
         self.username = ""
         self.synced = False
+        self.flag = True
+        self.most_recent_message = None
 
     def establish_conn(self):
         pass
@@ -44,10 +46,7 @@ class ClientHandler(Thread):
 
     def send_build_instruction(self):
         self.lobby.acquire()
-        if False:
-            print("init")
-            self.lobby.release()
-        else:
+        if not self.lobby.init_flag:
             self.lobby.init_game_state(self.width, self.height)
         response = {"INSTRUCTION": "BUILD",
                     "FIRST": self.lobby.turn,
@@ -61,6 +60,7 @@ class ClientHandler(Thread):
         self.lobby.release()
 
     def wait_for_client_to_build(self):
+        print("here1")
         flag = False
         while True:
             incoming_message = wait_for_message(self.conn)
@@ -86,6 +86,12 @@ class ClientHandler(Thread):
         response = wait_for_message(self.conn)
         # assume correct response
         self.synced = True
+    def listen(self):
+        #main loop
+        while self.flag:
+            self.most_recent_message = self.conn.recv(1024)
+
+
 
     def run(self):
         self.make_first_contact()

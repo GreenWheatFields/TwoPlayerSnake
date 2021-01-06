@@ -3,6 +3,7 @@ import time
 from threading import Lock
 import random
 import sys
+import pygame as pyg
 # todo, no need for this to be in server class. also these classes should have  server=False
 from snake_gmae_objects import Snake, Food, Game
 
@@ -39,6 +40,7 @@ class Lobby():
             self.players_ready.append(username)
 
     def sync(self):
+        print("here")
         self.players_ready = []
         self.start_time = time.time() + .25
         for client_handler in self.handlers.values():
@@ -48,23 +50,17 @@ class Lobby():
                 if client_handler.synced:
                     if client_handler.username not in self.players_ready:
                         self.players_ready.append(client_handler.username)
-        # begin game here. clients freeze here
-        # todo, check for timeour
+        self.run_game()
 
     def run_game(self):
+        #clients freeze here/ have weird behavior
         while time.time() < self.start_time:
             pass
         #senf the snake moving up . dont wait for user input to start game
         while True:
-            clock = time.clock()
+            clock = pyg.time.Clock()
             self.game.start()
-            # self.game.
-            pass
+
+            clock.tick(15)
 
         pass
-
-
-    def run_game(self):
-        pass
-
-
