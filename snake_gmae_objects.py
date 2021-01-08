@@ -1,3 +1,4 @@
+import time
 from collections import Counter
 
 import pygame
@@ -112,9 +113,11 @@ class Game:
                         self.clock.tick(15)
         else:
             x_change, y_change = self.analyze_event(event)
+            #return instruction object ftom here?
             print(self.xPos, self.yPos)
             self.xPos += x_change
             self.yPos += y_change
+            self.check_if_legal_move(x_change, y_change)
             return
         pygame.quit()
         quit()
@@ -173,14 +176,29 @@ class Game:
             return x_change, y_change
 
     def check_if_legal_move(self, x, y):
+        instruction = "QUIT"
         if self.xPos > self.width - 10 or self.xPos < 0 or self.xPos >= self.height or self.yPos < 0:
             return self.game_over() if not self.server else True
         elif self.xPos == self.food.food[0] and self.yPos == self.food.food[1]:
             self.snake.eat(self.food.food[0], self.food.food[1])
             self.score += 1
             self.food = Food(self.snake.snake, self.squares)
+            instruction = "CONTINUE"
         elif self.snake.isCollision(x, y):
-            return self.game_over() if not self.server else True
+            pass
+        else:
+            instruction = "CONTINUE"
+        if not self.server:
+            return self.game_over() if instruction == "QUIT" else True
+        else:
+            return {"INSTRUCTION": instruction,  # CONTINUE, QUIT
+             "SNAKEPOS": self.snake.snake,
+             "FOODPOS": self.food.food,
+             "SCORE": self.score,
+             "TURN": self.turn, #todo
+             "TIME": time.time()
+             }
+
     def game_over(self):
         pygame.quit()
         quit()

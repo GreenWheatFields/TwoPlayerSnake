@@ -210,7 +210,7 @@ class Game(Server):
             if instruction == "EAT":
                 instruction = "CONTINUE"
             else:
-                snake.draw(xPosistion, yPosistion)
+                snake.draw(None, None, xPosistion, yPosistion)
 
             self.turn = self.players[0] if self.players[0] != self.turn else self.players[1]
 

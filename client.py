@@ -222,7 +222,7 @@ class Game(Client):
             if self.most_recent_message is not None:
                 if self.most_recent_message["INSTRUCTION"] == "CONTINUE":
                     snake.snake = self.most_recent_message["SNAKEPOS"]
-                    food = Food(None, None, pos=self.most_recent_message["FOODPOS"])
+                    food = Food(None, pos=self.most_recent_message["FOODPOS"])
                     self.score = self.most_recent_message["SCORE"]
                     ping = time.time() - self.most_recent_message["TIME"]
                     self.our_turn = self.most_recent_message["TURN"] == self.user_name
@@ -230,7 +230,6 @@ class Game(Client):
                     if (ping > 2): self.game_over()
                 elif self.most_recent_message["INSTRUCTION"] == "QUIT":
                     break
-
             xPosistion += x_change
             yPosistion += y_change
 
