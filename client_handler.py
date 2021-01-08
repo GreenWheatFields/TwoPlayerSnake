@@ -60,7 +60,6 @@ class ClientHandler(Thread):
         self.lobby.release()
 
     def wait_for_client_to_build(self):
-        print("here1")
         flag = False
         while True:
             incoming_message = wait_for_message(self.conn)
@@ -74,7 +73,6 @@ class ClientHandler(Thread):
         flag = len(self.lobby.players_ready) == 2
         self.lobby.release()
         if flag:
-            print("here")
             self.lobby.sync()
 
     def send_sync_message(self, time):
@@ -86,10 +84,7 @@ class ClientHandler(Thread):
         response = wait_for_message(self.conn)
         # assume correct response
         self.synced = True
-    def listen(self):
-        #main loop
-        while self.flag:
-            self.most_recent_message = self.conn.recv(1024)
+
 
 
 
@@ -99,3 +94,11 @@ class ClientHandler(Thread):
             pass
         self.send_build_instruction()
         self.wait_for_client_to_build()
+
+    def listen(self, launch=True):
+        thread = Thread(target=self.listen, args=(False,))
+        if launch:
+            thread.start()
+            return
+        while self.flag:
+            self.most_recent_message = self.conn.recv(1024)

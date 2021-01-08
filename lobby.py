@@ -40,7 +40,6 @@ class Lobby():
             self.players_ready.append(username)
 
     def sync(self):
-        print("here")
         self.players_ready = []
         self.start_time = time.time() + .25
         for client_handler in self.handlers.values():
@@ -54,13 +53,17 @@ class Lobby():
 
     def run_game(self):
         #clients freeze here/ have weird behavior
+        for client_handler in self.handlers.values():
+            #should be done before start time
+            client_handler.listen()
         while time.time() < self.start_time:
             pass
         #senf the snake moving up . dont wait for user input to start game
+
+        print("starting game loop")
         while True:
             clock = pyg.time.Clock()
             self.game.start()
-
             clock.tick(15)
 
         pass

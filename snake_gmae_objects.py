@@ -40,7 +40,7 @@ class Snake():
             pygame.draw.rect(board.dis, white, [x, y, 10, 10])
         self.snake = [[x, y]]
 
-    def draw(self, board,color,newX, newY):
+    def draw(self, board, color, newX, newY):
         self.snake.append([newX, newY])
         self.snake.pop(0)
         if not self.server:
@@ -76,7 +76,7 @@ class Game:
         self.squares = tuple(self.squares)
         if not server:
             self.width = width
-            self.heigt = height
+            self.height = height
             self.board = Board(width, height)
         self.snake = Snake(200, 150, self.board)
         self.food = Food(self.snake, self.squares)
@@ -99,31 +99,22 @@ class Game:
             while not self.is_game_over:
                 for event in pygame.event.get():
                     x_change, y_change = self.analyze_event(event)
-            else:
-                x_change, y_change = self.analyze_event(event)
-                pass
+                    self.check_if_legal_move(x_change, y_change)
+                    self.xPos += x_change
+                    self.yPos += y_change
+                    if not self.server:
+                        board.dis.fill((0, 0, 0))
+                        self.food.draw()
+                        self.snake.draw(self.xPos, self.yPos)
+                        v = self.font.render(str(self.score), True, white)
+                        board.dis.blit(v, [0, 0])
+                        pygame.display.update()
+                        self.clock.tick(15)
+        else:
+            x_change, y_change = self.analyze_event(event)
             print(self.xPos, self.yPos)
-            if self.xPos > self.width - 10 or self.xPos < 0 or self.xPos >= self.height or self.yPos < 0:
-                return self.game_over() if not self.server else True
-            elif self.xPos == self.food.food[0] and self.yPos == self.food.food[1]:
-                self.snake.eat(self.food.food[0], self.food.food[1])
-                self.score += 1
-                self.food = Food(self.snake.snake, self.squares)
-            elif self.snake.isCollision(x_change, y_change):
-                return self.game_over() if not self.server else True
-
             self.xPos += x_change
             self.yPos += y_change
-            if not self.server:
-                board.dis.fill((0, 0, 0))
-                self.food.draw()
-                self.snake.draw(self.xPos, self.yPos)
-                v = self.font.render(str(self.score), True, white)
-                board.dis.blit(v, [0, 0])
-                pygame.display.update()
-                self.clock.tick(15)
-            else:
-                return
         pygame.quit()
         quit()
 
@@ -180,6 +171,15 @@ class Game:
 
             return x_change, y_change
 
+    def check_if_legal_move(self, x, y):
+        if self.xPos > self.width - 10 or self.xPos < 0 or self.xPos >= self.height or self.yPos < 0:
+            return self.game_over() if not self.server else True
+        elif self.xPos == self.food.food[0] and self.yPos == self.food.food[1]:
+            self.snake.eat(self.food.food[0], self.food.food[1])
+            self.score += 1
+            self.food = Food(self.snake.snake, self.squares)
+        elif self.snake.isCollision(x, y):
+            return self.game_over() if not self.server else True
     def game_over(self):
         pygame.quit()
         quit()
