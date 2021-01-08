@@ -115,6 +115,7 @@ class Game:
             print(self.xPos, self.yPos)
             self.xPos += x_change
             self.yPos += y_change
+            return
         pygame.quit()
         quit()
 

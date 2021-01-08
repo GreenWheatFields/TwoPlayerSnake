@@ -53,17 +53,23 @@ class Lobby():
 
     def run_game(self):
         #clients freeze here/ have weird behavior
-        for client_handler in self.handlers.values():
-            #should be done before start time
-            client_handler.listen()
+        turn = None
+        for client_handler in self.handlers.keys():
+            self.handlers[client_handler].listen()
+            if client_handler == self.turn:
+                turn = self.handlers[client_handler]
+
         while time.time() < self.start_time:
             pass
         #senf the snake moving up . dont wait for user input to start game
 
-        print("starting game loop")
         while True:
             clock = pyg.time.Clock()
+            event = turn.most_recent_message
+            print(event)
+            #save ticks here?
             self.game.start()
+            #notify here
             clock.tick(15)
 
         pass
