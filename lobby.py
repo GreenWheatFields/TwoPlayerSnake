@@ -4,7 +4,7 @@ from threading import Lock
 import random
 import sys
 import pygame as pyg
-# todo, no need for this to be in server class. also these classes should have  server=False
+from connection_behavior import *
 from snake_gmae_objects import Snake, Food, Game
 
 
@@ -66,10 +66,19 @@ class Lobby():
         while True:
             clock = pyg.time.Clock()
             event = turn.most_recent_message
-            print(event)
             #save ticks here?
-            self.game.start()
-            #notify here
+            print(event)
+            #TODO PASS IN THE VALIE OF EVENT NOT THE ENTIRE EVENT
+            message = self.game.start(event)
+            message["TURN"] = turn.username
+            if message["INSTRUCTION"] == "EAT":
+                for i in self.handlers.keys():
+                    if i != turn.username:
+                        turn = self.handlers[i]
+                message["TURN"] = turn.username
+            for client_handler in self.handlers.values():
+                client_handler.conn.sendall(send_json(message))
+
             clock.tick(15)
 
         pass

@@ -36,6 +36,7 @@ class ClientHandler(Thread):
             self.lobby.acquire()
             self.lobby.players.append(incoming["USERNAME"])
             self.lobby.handlers[incoming["USERNAME"]] = self
+            self.username = incoming["USERNAME"]
             response["WAITING"] = False if len(self.lobby.players) >= 2 else True
             self.lobby.release()
             response["TIME"] = time.time()

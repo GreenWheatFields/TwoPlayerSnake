@@ -106,57 +106,6 @@ class Client:
         self.socket.sendall(send_json({"USERNAME": self.user_name}))
 
 
-# class Board():
-#     def __init__(self, width, height):
-#         self.dis = pygame.display.set_mode((width, height))
-#         pygame.display.set_caption("2PSnake")
-#
-#
-# class Food:
-#     def __init__(self, snake, squares: tuple, pos=None):
-#         if pos is not None:
-#             self.food = pos
-#         else:
-#             self.food = self.spawnFood(squares, snake)
-#
-#     def draw(self):
-#         pygame.draw.rect(board.dis, (24, 252, 0), [self.food[0], self.food[1], 10, 10])
-#
-#     def spawnFood(self, squares, snake):
-#         valid_squares = list(squares)
-#         for j in snake:
-#             for index, i in enumerate(valid_squares):
-#                 if j == i:
-#                     valid_squares.pop(index)
-#         return random.choice(valid_squares)
-#
-#
-# class Snake:
-#     def __init__(self, x: int, y: int, board: Board):
-#         self.board = board
-#         pygame.draw.rect(board.dis, white, [x, y, 10, 10])
-#         self.snake = [[x, y]]
-#
-#     def draw(self, color):
-#         for i in self.snake:
-#             pygame.draw.rect(self.board.dis, color, [i[0], i[1], 10, 10])
-#
-#     def eat(self, x, y):
-#         self.snake.append([x, y])
-#
-#     def isCollision(self, x, y):
-#         snake_head = self.snake[len(self.snake) - 1]
-#         if [snake_head[0], snake_head[1]] in self.snake[0:len(self.snake) - 1]:
-#             return True
-#         elif len(self.snake) == 2:
-#             if y == 0:
-#                 if self.snake[1][0] + x == self.snake[0][0]:
-#                     return True
-#             elif x == 0:
-#                 if self.snake[1][1] + y == self.snake[0][1]:
-#                     return True
-#
-
 class Game(Client):
     def __init__(self):
         super().__init__()
@@ -222,12 +171,12 @@ class Game(Client):
             if self.most_recent_message is not None:
                 if self.most_recent_message["INSTRUCTION"] == "CONTINUE":
                     snake.snake = self.most_recent_message["SNAKEPOS"]
-                    food = Food(None, pos=self.most_recent_message["FOODPOS"])
+                    food = Food(snake.snake, self.squares, pos=self.most_recent_message["FOODPOS"])
                     self.score = self.most_recent_message["SCORE"]
                     ping = time.time() - self.most_recent_message["TIME"]
                     self.our_turn = self.most_recent_message["TURN"] == self.user_name
-                    print(ping)
                     if (ping > 2): self.game_over()
+                    print(self.our_turn)
                 elif self.most_recent_message["INSTRUCTION"] == "QUIT":
                     break
             xPosistion += x_change

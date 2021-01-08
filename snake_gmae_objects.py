@@ -75,10 +75,10 @@ class Game:
             for j in range(0, height, 10):
                 self.squares.append([i, j])
         self.squares = tuple(self.squares)
+        self.width = width
+        self.height = height
         if not server:
-            self.width = width
-            self.height = height
-            self.board = Board(width, height)
+            self.board = Board(self.width, self.height)
         self.snake = Snake(200, 150, self.board)
         self.food = Food(self.snake, self.squares)
         self.xPos = 200
@@ -114,11 +114,10 @@ class Game:
         else:
             x_change, y_change = self.analyze_event(event)
             #return instruction object ftom here?
-            print(self.xPos, self.yPos)
             self.xPos += x_change
             self.yPos += y_change
-            self.check_if_legal_move(x_change, y_change)
-            return
+            return self.check_if_legal_move(x_change, y_change)
+
         pygame.quit()
         quit()
 
@@ -157,6 +156,7 @@ class Game:
                         if i == sync_from["TIME"]:
                             flag = True
                 else:
+                    print("here")
                     event = event["EVENT"]
                     if event == "QUIT":
                         self.is_game_over = True
@@ -195,7 +195,7 @@ class Game:
              "SNAKEPOS": self.snake.snake,
              "FOODPOS": self.food.food,
              "SCORE": self.score,
-             "TURN": self.turn, #todo
+             "TURN": None,
              "TIME": time.time()
              }
 
