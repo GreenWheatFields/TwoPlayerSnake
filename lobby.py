@@ -66,10 +66,13 @@ class Lobby():
         while True:
             clock = pyg.time.Clock()
             event = turn.most_recent_message
+            if event is not None:
+                event = read_json(event)
             #save ticks here?
-            print(event)
-            #TODO PASS IN THE VALIE OF EVENT NOT THE ENTIRE EVENT
             message = self.game.start(event)
+            if type(message) is bool:
+                #todo, game over behavior
+                sys.exit(1)
             message["TURN"] = turn.username
             if message["INSTRUCTION"] == "EAT":
                 for i in self.handlers.keys():

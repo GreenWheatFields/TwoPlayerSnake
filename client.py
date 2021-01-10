@@ -176,7 +176,6 @@ class Game(Client):
                     ping = time.time() - self.most_recent_message["TIME"]
                     self.our_turn = self.most_recent_message["TURN"] == self.user_name
                     if (ping > 2): self.game_over()
-                    print(self.our_turn)
                 elif self.most_recent_message["INSTRUCTION"] == "QUIT":
                     break
             xPosistion += x_change
@@ -184,10 +183,9 @@ class Game(Client):
 
             board.dis.fill((0, 0, 0))
             food.draw(board)
-            snake.draw(board, red if self.most_recent_message is not None and self.most_recent_message["TURN"] == True else blue, xPosistion, xPosistion)
+            snake.draw(board, red, None, None)
             v = s.render(str(self.score), True, white)
             board.dis.blit(v, [0, 0])
-
             pygame.display.update()
             clock.tick(15)
         pygame.quit()

@@ -42,11 +42,13 @@ class Snake():
         self.snake = [[x, y]]
 
     def draw(self, board, color, newX, newY):
-        self.snake.append([newX, newY])
-        self.snake.pop(0)
         if not self.server:
             for i in self.snake:
                 pygame.draw.rect(board.dis, color, [i[0], i[1], 10, 10])
+                return
+        self.snake.append([newX, newY])
+        self.snake.pop(0)
+
 
     def eat(self, x, y):
         self.snake.append([x, y])
@@ -156,7 +158,6 @@ class Game:
                         if i == sync_from["TIME"]:
                             flag = True
                 else:
-                    print("here")
                     event = event["EVENT"]
                     if event == "QUIT":
                         self.is_game_over = True
@@ -172,7 +173,6 @@ class Game:
                     elif event == "DOWN":
                         x_change = 0
                         y_change = 10
-
             return x_change, y_change
 
     def check_if_legal_move(self, x, y):
@@ -180,6 +180,7 @@ class Game:
         if self.xPos > self.width - 10 or self.xPos < 0 or self.xPos >= self.height or self.yPos < 0:
             return self.game_over() if not self.server else True
         elif self.xPos == self.food.food[0] and self.yPos == self.food.food[1]:
+            self.snake.draw(None,None,self.xPos, self.yPos)
             self.snake.eat(self.food.food[0], self.food.food[1])
             self.score += 1
             self.food = Food(self.snake.snake, self.squares)
@@ -187,6 +188,7 @@ class Game:
         elif self.snake.isCollision(x, y):
             pass
         else:
+            self.snake.draw(None,None,self.xPos, self.yPos)
             instruction = "CONTINUE"
         if not self.server:
             return self.game_over() if instruction == "QUIT" else True
