@@ -26,7 +26,7 @@ class Food:
 
     def spawnFood(self, squares, snake):
         valid_squares = list(squares)
-        for j in snake.snake:
+        for j in snake:
             for index, i in enumerate(valid_squares):
                 if j == i:
                     valid_squares.pop(index)
@@ -44,8 +44,10 @@ class Snake():
     def draw(self, board, color, newX, newY):
         if not self.server:
             for i in self.snake:
+                if i[0] is None:
+                    return
                 pygame.draw.rect(board.dis, color, [i[0], i[1], 10, 10])
-                return
+
         self.snake.append([newX, newY])
         self.snake.pop(0)
 
@@ -82,7 +84,7 @@ class Game:
         if not server:
             self.board = Board(self.width, self.height)
         self.snake = Snake(200, 150, self.board)
-        self.food = Food(self.snake, self.squares)
+        self.food = Food(self.snake.snake, self.squares)
         self.xPos = 200
         self.yPos = 150
         self.is_game_over = False
@@ -180,7 +182,6 @@ class Game:
         if self.xPos > self.width - 10 or self.xPos < 0 or self.xPos >= self.height or self.yPos < 0:
             return self.game_over() if not self.server else True
         elif self.xPos == self.food.food[0] and self.yPos == self.food.food[1]:
-            self.snake.draw(None,None,self.xPos, self.yPos)
             self.snake.eat(self.food.food[0], self.food.food[1])
             self.score += 1
             self.food = Food(self.snake.snake, self.squares)

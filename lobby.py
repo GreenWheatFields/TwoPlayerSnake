@@ -70,8 +70,10 @@ class Lobby():
                 event = read_json(event)
             #save ticks here?
             message = self.game.start(event)
+            print(message)
             if type(message) is bool:
                 #todo, game over behavior
+                print("server error")
                 sys.exit(1)
             message["TURN"] = turn.username
             if message["INSTRUCTION"] == "EAT":

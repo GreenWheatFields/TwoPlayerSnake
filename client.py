@@ -183,10 +183,11 @@ class Game(Client):
 
             board.dis.fill((0, 0, 0))
             food.draw(board)
-            snake.draw(board, red, None, None)
+            snake.draw(board, red if self.our_turn else blue, None, None)
             v = s.render(str(self.score), True, white)
             board.dis.blit(v, [0, 0])
             pygame.display.update()
+
             clock.tick(15)
         pygame.quit()
         quit()
