@@ -185,7 +185,7 @@ class Game:
             self.snake.eat(self.food.food[0], self.food.food[1])
             self.score += 1
             self.food = Food(self.snake.snake, self.squares)
-            instruction = "CONTINUE"
+            instruction = "EAT"
         elif self.snake.isCollision(x, y):
             pass
         else:

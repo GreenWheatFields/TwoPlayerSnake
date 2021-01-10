@@ -58,7 +58,6 @@ class Lobby():
             self.handlers[client_handler].listen()
             if client_handler == self.turn:
                 turn = self.handlers[client_handler]
-
         while time.time() < self.start_time:
             pass
         #senf the snake moving up . dont wait for user input to start game
@@ -70,7 +69,6 @@ class Lobby():
                 event = read_json(event)
             #save ticks here?
             message = self.game.start(event)
-            print(message)
             if type(message) is bool:
                 #todo, game over behavior
                 print("server error")
@@ -79,8 +77,10 @@ class Lobby():
             if message["INSTRUCTION"] == "EAT":
                 for i in self.handlers.keys():
                     if i != turn.username:
-                        turn = self.handlers[i]
+                        #todo, this area is weird
+                        print(i, turn.username)
                 message["TURN"] = turn.username
+                message["INSTRUCTION"] = "CONTINUE"
             for client_handler in self.handlers.values():
                 client_handler.conn.sendall(send_json(message))
 

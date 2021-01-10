@@ -144,30 +144,27 @@ class Game(Client):
         while time.time() < float(self.start_time):
             pass
         while not game_over:
-            if self.our_turn:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        game_over = True
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_LEFT:
-                            x_change = -10
-                            y_change = 0
-                            message = "LEFT"
-                        elif event.key == pygame.K_RIGHT:
-                            x_change = 10
-                            y_change = 0
-                            message = "RIGHT"
-                        elif event.key == pygame.K_UP:
-                            x_change = 0
-                            y_change = -10
-                            message = "UP"
-                        elif event.key == pygame.K_DOWN:
-                            x_change = 0
-                            y_change = 10
-                            message = "DOWN"
-
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    game_over = True
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_LEFT:
+                        x_change = -10
+                        y_change = 0
+                        message = "LEFT"
+                    elif event.key == pygame.K_RIGHT:
+                        x_change = 10
+                        y_change = 0
+                        message = "RIGHT"
+                    elif event.key == pygame.K_UP:
+                        x_change = 0
+                        y_change = -10
+                        message = "UP"
+                    elif event.key == pygame.K_DOWN:
+                        x_change = 0
+                        y_change = 10
+                        message = "DOWN"
             self.socket.sendall(send_json({"EVENT": message}))
-
             if self.most_recent_message is not None:
                 if self.most_recent_message["INSTRUCTION"] == "CONTINUE":
                     snake.snake = self.most_recent_message["SNAKEPOS"]
@@ -187,7 +184,6 @@ class Game(Client):
             v = s.render(str(self.score), True, white)
             board.dis.blit(v, [0, 0])
             pygame.display.update()
-
             clock.tick(15)
         pygame.quit()
         quit()
