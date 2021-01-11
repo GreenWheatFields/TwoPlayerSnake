@@ -1,16 +1,13 @@
-import time
-import random
-import pygame
-import threading
-from threading import *
 from client_handler import ClientHandler
 from connection_behavior import *
 from lobby import Lobby
-from snake_gmae_objects import Food, Snake
 
 width = 500
 height = 500
 white = (255, 255, 255)
+#
+# todo, lobby needs to notify server when it dies
+#     syncing behavior not inplemented
 
 
 class Server:

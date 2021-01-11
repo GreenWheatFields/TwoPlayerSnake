@@ -1,4 +1,3 @@
-# game state here. acsessed by two clientlisteners
 import time
 from threading import Lock
 import random

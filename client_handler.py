@@ -8,9 +8,6 @@ from connection_behavior import *
 
 
 class ClientHandler(Thread):
-    # one per client for now
-    # ideally, there would be one send method that takes a message / response behavior parameter. but wwhatever
-
     def __init__(self, conn: socket.socket, lobby: Lobby):
         super().__init__()
         self.conn = conn

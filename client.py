@@ -1,9 +1,4 @@
-import socket
-import time
 import uuid
-import json
-import pygame
-import sys
 import threading
 from connection_behavior import *
 from snake_gmae_objects import *
