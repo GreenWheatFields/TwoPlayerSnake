@@ -181,12 +181,10 @@ class Game:
                         if self.lastEvent is not None:
                             if self.lastEvent["EVENT"] != "NONE":
                                 event = self.lastEvent
-                                print("here")
                                 return self.analyze_event(event)
 
                 pass
                 # return self.analyze_event(self.lastEvent) if self.lastEvent is not None else x_change, y_change
-            print(self.lastEvent)
             return x_change, y_change
 
     def check_if_legal_move(self, x, y):

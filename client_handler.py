@@ -102,4 +102,7 @@ class ClientHandler(Thread):
             thread.start()
             return
         while self.flag:
-            self.most_recent_message = self.conn.recv(1024)
+            try:
+                self.most_recent_message = self.conn.recv(1024)
+            except ConnectionError:
+                break

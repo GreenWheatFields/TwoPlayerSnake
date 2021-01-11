@@ -65,8 +65,7 @@ class Lobby():
         while time.time() < self.start_time:
             pass
         #senf the snake moving up . dont wait for user input to start game
-        print(turn)
-        while True:
+        while self.init_flag:
             clock = pyg.time.Clock()
             event = cur_handler.most_recent_message
             if event is not None:
@@ -75,8 +74,8 @@ class Lobby():
             message = self.game.start(event)
             if type(message) is bool:
                 #todo, game over behavior
-                print("server error")
-                sys.exit(1)
+                self.clean_up_and_leave()
+                break
             message["TURN"] = cur_handler.username
             if message["INSTRUCTION"] == "EAT":
                 for i in self.handlers.keys():
@@ -87,7 +86,16 @@ class Lobby():
                 message["TURN"] = cur_handler.username
                 message["INSTRUCTION"] = "CONTINUE"
             for client_handler in self.handlers.values():
-                client_handler.conn.sendall(send_json(message))
-
+                try:
+                    client_handler.conn.sendall(send_json(message))
+                except ConnectionError:
+                    self.clean_up_and_leave()
             clock.tick(15)
-        pass
+
+    def clean_up_and_leave(self):
+        for handler in self.handlers.values():
+            self.init_flag = False
+            handler.flag = False
+            handler.conn.close()
+
+
