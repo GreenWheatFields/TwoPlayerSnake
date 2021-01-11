@@ -88,6 +88,7 @@ class Game:
         self.xPos = 200
         self.yPos = 150
         self.is_game_over = False
+        self.lastEvent = None
 
     def start(self, event=None):
         # for now. server = True basicallt doesnt let Game() control itself while Client() does.
@@ -160,21 +161,32 @@ class Game:
                         if i == sync_from["TIME"]:
                             flag = True
                 else:
-                    event = event["EVENT"]
-                    if event == "QUIT":
+                    event_raw = event["EVENT"]
+                    self.lastEvent = event if event_raw != "NONE" else self.lastEvent
+                    if event_raw == "QUIT":
                         self.is_game_over = True
-                    elif event == "LEFT":
+                    elif event_raw == "LEFT":
                         x_change = -10
                         y_change = 0
-                    elif event == "RIGHT":
+                    elif event_raw == "RIGHT":
                         x_change = 10
                         y_change = 0
-                    elif event == "UP":
+                    elif event_raw == "UP":
                         x_change = 0
                         y_change = -10
-                    elif event == "DOWN":
+                    elif event_raw == "DOWN":
                         x_change = 0
                         y_change = 10
+                    elif event_raw == "NONE":
+                        if self.lastEvent is not None:
+                            if self.lastEvent["EVENT"] != "NONE":
+                                event = self.lastEvent
+                                print("here")
+                                return self.analyze_event(event)
+
+                pass
+                # return self.analyze_event(self.lastEvent) if self.lastEvent is not None else x_change, y_change
+            print(self.lastEvent)
             return x_change, y_change
 
     def check_if_legal_move(self, x, y):

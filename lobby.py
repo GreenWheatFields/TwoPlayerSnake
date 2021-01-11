@@ -53,18 +53,22 @@ class Lobby():
 
     def run_game(self):
         #clients freeze here/ have weird behavior
-        turn = None
-        for client_handler in self.handlers.keys():
+        players = []
+        cur_handler = None
+        turn = 0
+        for index, client_handler in enumerate(self.handlers.keys()):
             self.handlers[client_handler].listen()
+            players.append(self.handlers[client_handler])
             if client_handler == self.turn:
-                turn = self.handlers[client_handler]
+                turn = index
+                cur_handler = self.handlers[client_handler]
         while time.time() < self.start_time:
             pass
         #senf the snake moving up . dont wait for user input to start game
-
+        print(turn)
         while True:
             clock = pyg.time.Clock()
-            event = turn.most_recent_message
+            event = cur_handler.most_recent_message
             if event is not None:
                 event = read_json(event)
             #save ticks here?
@@ -73,17 +77,17 @@ class Lobby():
                 #todo, game over behavior
                 print("server error")
                 sys.exit(1)
-            message["TURN"] = turn.username
+            message["TURN"] = cur_handler.username
             if message["INSTRUCTION"] == "EAT":
                 for i in self.handlers.keys():
-                    if i != turn.username:
-                        #todo, this area is weird
-                        print(i, turn.username)
-                message["TURN"] = turn.username
+                    if i != cur_handler.username:
+                        turn = int(not turn)
+                        cur_handler = players[turn]
+                        break
+                message["TURN"] = cur_handler.username
                 message["INSTRUCTION"] = "CONTINUE"
             for client_handler in self.handlers.values():
                 client_handler.conn.sendall(send_json(message))
 
             clock.tick(15)
-
         pass

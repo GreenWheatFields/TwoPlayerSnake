@@ -15,8 +15,8 @@ class ClientHandler(Thread):
         super().__init__()
         self.conn = conn
         self.lobby = lobby
-        self.width = 500
-        self.height = 500
+        self.width = 750
+        self.height = 750
         self.username = ""
         self.synced = False
         self.flag = True
